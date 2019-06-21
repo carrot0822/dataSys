@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>数据可视化</title>
+	<link rel="stylesheet" href="css/reset.css" />
+	<style>
+		body {
+			background-image: url(img/bg1.jpg);
+			background-size: cover;
+			background-position: 50% 50%;
+			background-repeat: no-repeat;
+		}
+
+		.main {
+			min-height: 100vh;
+		}
+
+		.header {
+			height: 91px;
+			background-image: url("./img/标题框@2x.png");
+			background-repeat: no-repeat;
+			background-position: 50% 50%;
+			background-size: cover;
+			position: relative;
+			text-align: center;
+			margin-bottom: 46px;
+		}
+
+		.header .title {
+			position: absolute;
+			font-family: AliHYAiHei;
+			font-size: 40px;
+			color: #ffffff;
+			width: 100%;
+			padding-top: 18px;
+		}
+
+		.header .imgBox {
+			position: absolute;
+			z-index: 2;
+			top: 22px;
+			left: 46px;
+		}
+
+		.header .usual {
+			font-family: MicrosoftYaHei;
+			font-size: 22px;
+			color: #ffffff;
+			position: absolute;
+			top: 35px;
+			right: 38px;
+		}
+
+		.content {
+			padding: 0 65px;
+			margin-bottom: 40px;
+		}
+
+		.contentBox {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+		}
+
+		/*--- 第一个框 ---*/
+		.contentBox .circulate {
+			background-image: url("./img/方框01@2x.png");
+			background-size: cover;
+			background-position: 50% 50%;
+			background-repeat: no-repeat;
+			width: 519px;
+			height: 585px;
+			position: relative;
+		}
+
+		.contentBox .circulate .title {
+			margin-left: 133px;
+			margin-top: 37px;
+			font-size: 24px;
+			color: #ffffff;
+			margin-bottom: 46px;
+		}
+
+		.smallTitle {
+
+			font-size: 24px;
+			color: #ffffff;
+
+		}
+
+		/*当前流出*/
+		.dataBase {
+			margin-bottom: 17px;
+		}
+
+		.dataBox {
+			height: 68px;
+			margin-bottom: 25px;
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+		}
+
+		.dataBase .dataBox:last-child {
+			margin-bottom: 0;
+		}
+
+		.dataBox .text {
+			font-size: 16px;
+			color: #ffffff;
+			margin-right: 34px;
+			text-align: right;
+			width: 175px;
+			font-family: MicrosoftYaHei;
+		}
+
+		.dataBox .number {
+			font-family: AliHYAiHei;
+			font-size: 36px;
+			color: #ffffff;
+			width: 260px;
+			text-align: center;
+		}
+
+		/*环形图*/
+		.circle-bottom {
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+		}
+
+		.data-cicle {
+			text-align: center;
+
+		}
+
+		.cicle-normal {
+			width: 138px;
+			height: 138px;
+
+			border-radius: 50%;
+			border: 2px dashed #0fc8fd;
+			position: relative;
+			margin-bottom: 15px;
+
+		}
+
+		.cicle-boll {
+			width: 110px;
+			height: 110px;
+			line-height: 110px;
+			text-align: center;
+			border-radius: 50%;
+			background: linear-gradient(#0fc8fd, #6678ff);
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			font-size: 20px;
+			font-family: MicrosoftYaHei;
+			color: #ffffff;
+		}
+
+		.cicle-text {
+			color: #ffffff;
+			font-family: MicrosoftYaHei;
+			font-size: 16px;
+			width: 140px;
+			height: 140px;
+			text-align: center;
+		}
+
+		.cicle-normal.first {
+			margin-right: 78px;
+		}
+
+		/*------ 中距第二层 ------*/
+		.contentBox .arrive {
+			width: 673px;
+			height: 591px;
+			background-size: cover;
+			background-position: 50% 50%;
+			background-repeat: no-repeat;
+			background-image: url("./img/方框02@2x.png");
+		}
+
+		.arriveTitle {
+			margin-left: 115px;
+			margin-top: 44px;
+			margin-bottom: 82px;
+		}
+
+		.commonNumber {
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+		}
+
+		.commonNumber .com-numberBox {
+			width: 70px;
+			height: 113px;
+			border-radius: 6px;
+			border: solid 2px #00bf7b;
+			text-align: center;
+			line-height: 113px;
+			font-family: FZHZGBJW--GB1-0;
+			font-size: 54.03px;
+			color: #ffffff;
+			margin-right: 20px;
+		}
+
+		.dot {
+			font-family: FZHZGBJW--GB1-0;
+			font-size: 54.03px;
+			color: #ffffff;
+			margin-right: 14px;
+			height: 113px;
+			width: 11px;
+			position: relative;
+		}
+
+		.dotNorm {
+			position: absolute;
+			bottom: 17px;
+		}
+		.mb_60{
+			margin-bottom: 60px;
+		}
+		.mb_15{
+			margin-bottom: 15px;
+		}
+		/*--- 渐变圆环警告 ---*/
+		.arrive-cicleBox{
+			display: flex;
+			padding-left: 38px;
+		}
+		.arrive-text{
+			font-size: 16px;
+			color: #ffffff;
+			text-align: center;
+			font-weight: bold;
+		}
+		 .canvasBox{
+			position: relative;
+			display: inline-block;
+		}
+		.canvas-text{
+			font-size: 20px;
+			font-family: AliHYAiHei;
+			color: #ffffff;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%,-50%);
+			
+		}
+		/*------ 中距第三层 ------*/
+		.contentBox .dynamic {
+			background-image: url("./img/方框01@2x.png");
+			background-size: cover;
+			background-position: 50% 50%;
+			background-repeat: no-repeat;
+			width: 519px;
+			height: 585px;
+		}
+
+		.dynamicTitle {
+			margin-left: 134px;
+			margin-top: 37px;
+			margin-bottom: 57px;
+		}
+
+		.videoBox {
+			width: 400px;
+			height: 240px;
+			margin: 0 auto;
+			background: #00bf7b;
+			margin-bottom: 30px;
+
+		}
+
+		.noticeBox {
+			width: 400px;
+			margin: 0 auto;
+			position: relative;
+		}
+
+		.paragraph {
+			font-family: MicrosoftYaHei;
+			font-size: 16px;
+			line-height: 24px;
+			color: #ffffff;
+			text-indent: 10px;
+			text-align: justify;
+
+		}
+
+		.noticeBox::before {
+			content: '';
+			background: #ff482a;
+			width: 11px;
+			height: 11px;
+			border-radius: 50%;
+			position: absolute;
+			top: 6px;
+		}
+
+		/*------ 下距 ------*/
+		.footer {
+			padding: 0 65px;
+			margin-bottom: 40px;
+		}
+
+		.footerBox {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+		}
+
+		.footerBox .borrow {
+			width: 515px;
+			height: 286px;
+			background-image: url("./img/方框04@2x.png");
+		}
+
+		.rank {
+			width: 100%;
+			padding-left: 44px;
+			padding-right: 56px;
+		}
+
+		.rankList {
+			color: #ffffff;
+			font-size: 16px;
+			margin-bottom: 15px;
+		}
+
+		.mr_15 {
+			margin-right: 15px;
+		}
+
+		.mr_80 {
+			margin-right: 80px;
+		}
+
+		.rankList .amount {
+			color: #08ebf2;
+		}
+
+		.rankList .bookName {
+			margin-right: 30px;
+		}
+
+		.borrowTitle {
+			margin-left: 121px;
+			margin-top: 51px;
+			margin-bottom: 43px;
+		}
+
+		/*--- 馆藏总量 ---*/
+		.footerBox .collect {
+			width: 682px;
+			height: 284px;
+			background-image: url("./img/方框05@2x.png");
+		}
+
+		.collectTitle {
+			margin-top: 45px;
+			margin-left: 127px;
+			margin-bottom: 48px;
+		}
+		/*--- 书籍推荐 ---*/
+		.footerBox .recommand {
+			width: 517px;
+			height: 288px;
+			background-image: url("./img/方框6@2x.png");
+		}
+		.recommandTitle{
+			margin-top: 45px;
+			margin-left: 127px;
+			margin-bottom: 24px;
+		}
+		.backgrond {
+			background-size: cover;
+			background-position: 50% 50%;
+			background-repeat: no-repeat;
+		}
+		@font-face{
+			font-family: 'AliHYAiHei';
+			src: url('./css/AliHYAiHei.ttf');
+			font-weight: normal;  
+  			font-style: normal; 
+		}
+		@font-face{
+			font-family: 'FZHZGBJW--GB1-0';
+			src: url('./css/方正汉真广标简体.TTF');
+			font-weight: normal;  
+  			font-style: normal; 
+		}
+	</style>
+</head>
+
+<body>
+	<div class="main">
+		<section class="header">
+			<div class="imgBox">
+				<img src="./img/logo@2x.png" />
+			</div>
+			<p class="title">智 能 图 书 馆 实 时 大 数 据</p>
+			<div class="usual">
+				<span>2019年06月13日</span>
+				<span>今日天气</span>
+				<span>今日温度</span>
+			</div>
+		</section>
+		<section class="content">
+			<div class="contentBox">
+				<section class="circulate">
+					<p class="title">
+						文献流通
+					</p>
+					<div class="dataBase">
+						<div class="dataBox">
+							<div class="text">当前借出</div>
+							<div class="number">7 5 6 8</div>
+						</div>
+						<div class="dataBox">
+							<div class="text">当前还入</div>
+							<div class="number">5 6 6 8</div>
+						</div>
+						<div class="dataBox">
+							<div class="text">累计今年借阅量</div>
+							<div class="number">1 5 6 6 8</div>
+						</div>
+					</div>
+					<div class="circle-bottom">
+						<div class="data-cicle">
+							<div class="cicle-normal first">
+								<div class="cicle-boll">
+									1448
+								</div>
+							</div>
+							<div class="cicle-text">昨日借出</div>
+						</div>
+						<div class="data-cicle">
+							<div class="cicle-normal">
+								<div class="cicle-boll">
+									1448
+								</div>
+							</div>
+							<span class="cicle-text">昨日还入</span>
+						</div>
+					</div>
+
+				</section>
+				<section class="arrive">
+					<p class="smallTitle arriveTitle">
+						累计到馆人数
+					</p>
+					<div class="mb_60 commonNumber">
+						<div class="com-numberBox">
+							2
+						</div>
+						<div class="com-numberBox">
+							6
+						</div>
+						<div class="dot">
+							<span class="dotNorm">,</span>
+						</div>
+						<div class="com-numberBox">
+							0
+						</div>
+						<div class="com-numberBox">
+							0
+						</div>
+						<div class="com-numberBox">
+							9
+						</div>
+					</div>
+					<div class="arrive-cicleBox">
+						<div class="arrive-circle">
+							<div class="mb_15 canvasBox">
+								<canvas id="canvas"></canvas>
+								<p class="canvas-text">3000</p>
+							</div>
+							<p class="arrive-text">上月到馆</p>
+						</div>
+					</div>
+				</section>
+				<section class="dynamic">
+					<p class="smallTitle dynamicTitle">
+						馆内动态
+					</p>
+					<div class="videoBox">
+
+					</div>
+					<div class="noticeBox">
+						<p class="paragraph">
+							【图书馆工会开展“中国梦•劳动美”诵读与写诗活动】
+							图书馆工会根据校工会《关于开展“中国梦•劳动美”职工
+							学习习近平新时代中国特色社会主义思想诵读活动的通知》
+							组织开展以“中国梦·劳动美”为主题的学习习近平新时代
+							中国特色社会主义思想诵读和写诗作活动。
+						</p>
+					</div>
+				</section>
+			</div>
+
+		</section>
+		<section class="footer">
+			<div class="footerBox">
+				<div class="borrow backgrond">
+					<p class="smallTitle borrowTitle">
+						本月借阅排行榜
+					</p>
+					<div class="rank">
+						<p class="rankList">
+							<span class="bookName">《盗墓笔记》</span>
+							<span class="mr_15">作者</span>
+							<span class="author mr_80">南派三叔 </span>
+							<span class="amount">借阅 50</span>
+						</p>
+						<p class="rankList">
+							<span class="bookName">《盗墓笔记》</span>
+							<span class="mr_15">作者</span>
+							<span class="author mr_80">南派三叔 </span>
+							<span class="amount">借阅 50</span>
+						</p>
+						<p class="rankList">
+							<span class="bookName">《盗墓笔记》</span>
+							<span class="mr_15">作者</span>
+							<span class="author mr_80">南派三叔 </span>
+							<span class="amount">借阅 50</span>
+						</p>
+						<p class="rankList">
+							<span class="bookName">《盗墓笔记》</span>
+							<span class="mr_15">作者</span>
+							<span class="author mr_80">南派三叔 </span>
+							<span class="amount">借阅 50</span>
+						</p>
+					</div>
+				</div>
+				<div class="collect backgrond">
+					<p class="smallTitle collectTitle">
+						馆藏总量
+					</p>
+					<div class="commonNumber">
+						<div class="com-numberBox">
+							5
+						</div>
+						<div class="com-numberBox">
+							0
+						</div>
+						<div class="dot">
+							<span class="dotNorm">,</span>
+						</div>
+						<div class="com-numberBox">
+							2
+						</div>
+						<div class="com-numberBox">
+							3
+						</div>
+						<div class="com-numberBox">
+							4
+						</div>
+					</div>
+				</div>
+				<div class="recommand backgrond">
+						<p class="smallTitle recommandTitle">
+								书籍推荐
+						</p>
+						<div class="sliderBox">
+
+						</div>
+				</div>
+			</div>
+		</section>
+	</div>
+</body>
+
+</html>
+
+<script>
+	window.onload = function () {
+			var canvas = document.getElementById('canvas');
+			canvas.width = 132;
+			canvas.height = 132;
+			
+			var context = canvas.getContext('2d');
+			context.lineCap = 'round';
+			var gradient = context.createLinearGradient(0,100,100,200)
+			 gradient.addColorStop(0,'#00ffd8')
+			 gradient.addColorStop(1,'#0066ff')
+			context.lineWidth =5;
+			context.strokeStyle = gradient;
+
+			context.beginPath(); //重新规划 不一定要一起出现
+			context.arc(64,64,60,0,2*Math.PI,true);
+				//context.closePath();//如果不是封闭的线条 则会自动帮你封闭
+			context.stroke();
+			
+			//
+			context.beginPath()
+			context.lineWidth = 15
+			context.arc(64,64,60,0,Math.PI*0.5,false)
+			context.stroke(); 
+			
+		}
+		/*
+		 * 绘制圆6个参数 fill也会封闭 stroke是绘制线条 closePath代表首尾相连
+		 */
+	</script>
+	
+</script>
