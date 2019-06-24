@@ -53,13 +53,33 @@ strong{
 em{
 	font-style: italic;
 }
-    font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Helvetica, Arial,
-	"Hiragino Sans GB", "Source Han Sans", "Noto Sans CJK Sc", "Microsoft YaHei", "Microsoft Jhenghei", sans-serif;
-    border-color: rgb(169, 169, 169);
+@font-face{
+	font-family: 'AliHYAiHei';
+	src: url('./AliHYAiHei.ttf');
+	font-weight: normal;  
+	  font-style: normal; 
 }
-/*个性化修改elementUI*/
+@font-face{
+	font-family: 'FZHZGBJW--GB1-0';
+	src: url('./方正汉真广标简体.TTF');
+	font-weight: normal;  
+	  font-style: normal; 
+}
 
 
+.mb_60{
+	margin-bottom: 60px;
+}
+.mb_15{
+	margin-bottom: 15px;
+}
+.mr_15 {
+	margin-right: 15px;
+}
+
+.mr_80 {
+	margin-right: 80px;
+}
 
 
 	
