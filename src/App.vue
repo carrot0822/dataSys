@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <data-page></data-page>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -24,9 +24,11 @@ body{
   height: 100vh;
   overflow: hidden;
   */
+  
   background-image: url("./assets/img/bg1.jpg");
     background-size: cover;
     background-position: 50% 50%;
     background-repeat: no-repeat;
+    
 }
 </style>

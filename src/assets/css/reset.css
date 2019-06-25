@@ -73,13 +73,20 @@ em{
 .mb_15{
 	margin-bottom: 15px;
 }
+.mb_8{
+	margin-bottom: 8px;
+}
 .mr_15 {
 	margin-right: 15px;
 }
-
+.mr_8{
+	margin-right: 8px;
+}
 .mr_80 {
 	margin-right: 80px;
 }
-
+.ml_24{
+	margin-left: 24px;
+}
 
 	

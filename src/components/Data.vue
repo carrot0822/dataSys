@@ -56,7 +56,22 @@
             </div>
           </div>
           <div class="arrive-cicleBox">
-            
+            <div class="Ring-Box">
+              <Ring></Ring>
+              <p class="ring-text">上月到馆</p>
+            </div>
+            <div class="Ring-Box">
+              <Ring></Ring>
+              <p class="ring-text">本月到馆</p>
+            </div>
+            <div class="Ring-Box">
+              <Ring></Ring>
+              <p class="ring-text">昨日到馆</p>
+            </div>
+            <div class="Ring-Box">
+              <Ring></Ring>
+              <p class="ring-text">今日到馆</p>
+            </div>
           </div>
         </section>
         <section class="dynamic">
@@ -89,7 +104,7 @@
               <span v-if="index==2" class="imgBox">
                 <img src="../assets/img/rank3.png">
               </span>
-              <span class="bookName">{{item.NAME}}</span>
+              <span class="bookName">{{item.name}}</span>
               <span class="mr_15">作者</span>
               <span class="author">{{item.author}}</span>
               <span class="amount">借阅 {{item.count}}</span>
@@ -109,7 +124,21 @@
         </div>
         <div class="recommand backgrond">
           <p class="smallTitle recommandTitle">书籍推荐</p>
-          <div class="sliderBox"></div>
+
+          <div class="recommandBox">
+            <div class="sliderBox">
+              
+            </div>
+            <div class="textBox">
+              <P class="mb_8">
+                <span class="rankNumber">1</span>
+                <span class="bookName">《悲惨世界》</span>
+                —— 雨果
+                <span></span>
+              </P>
+              <p class="ml_24">人民文学出版社</p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -119,7 +148,9 @@
 <script>
 import particlesJs from "particles.js";
 import particlesConfig from "../assets/js/particles.json";
+import Ring from "../assets/common/circle/circle";
 import { dataInt } from "../Api/api";
+
 export default {
   data() {
     return {
@@ -132,8 +163,11 @@ export default {
       },
       collectArr: [0, 0, 0, 0, 0],
       arriveArr: [0, 0, 0, 0, 0],
-      borrowRank: []
+      borrowRank: [],
     };
+  },
+  components: {
+    Ring,
   },
   methods: {
     init() {
@@ -199,6 +233,7 @@ export default {
   },
   mounted() {
     this.init();
+    
   },
   beforeDestroy() {
     if (pJSDom && pJSDom.length > 0) {
@@ -360,7 +395,15 @@ body {
           .arrive-cicleBox {
             display: flex;
             padding-left: 38px;
-            .arrive-circle {
+
+            .Ring-Box {
+              margin-right: 20px;
+              .ring-text {
+                padding-top: 17px;
+                color: #ffffff;
+                font-size: 16px;
+                text-align: center;
+              }
             }
           }
         }
@@ -435,11 +478,11 @@ body {
               color: #ffffff;
               font-size: 16px;
               margin-bottom: 15px;
-              .imgBox{
-                  img{
-                      vertical-align: bottom;
-                      margin-bottom: -2px;
-                  }
+              .imgBox {
+                img {
+                  vertical-align: bottom;
+                  margin-bottom: -2px;
+                }
               }
               .bookName {
                 width: 110px;
@@ -491,6 +534,39 @@ body {
             margin-top: 45px;
             margin-left: 127px;
             margin-bottom: 24px;
+          }
+
+          .recommandBox {
+            padding: 0 36px;
+            display: flex;
+            flex-direction: row;
+            .sliderBox {
+              width: 250px;
+              height: 120px;
+              .imgBox {
+                background-color: #00bf7b;
+                width: 140px;
+                height: 140px;
+              }
+              img {
+                width: 130px;
+                height: 110px;
+              }
+            }
+            .textBox {
+              font-size: 16px;
+              color: #ffffff;
+              .rankNumber {
+                width: 19px;
+                height: 19px;
+                border-radius: 50%;
+                display: inline-block;
+                text-align: center;
+                line-height: 19px;
+                font-size: 16px;
+                background-color: #6b071a;
+              }
+            }
           }
         }
       }

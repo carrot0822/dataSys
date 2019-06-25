@@ -1,30 +1,54 @@
 <template>
   <div class="arrive-circle">
-    <div class="mb_15 canvasBox">
-      <canvas id="canvas"></canvas>
-      <p class="canvas-text">3000</p>
+    <div class="canvasBox">
+      <canvas ref="canvas" id="canvas"></canvas>
+      <p class="canvas-text">{{value}}</p>
     </div>
-    <p class="arrive-text">上月到馆</p>
+    
   </div>
 </template>
 
 <script>
 export default {
-  props: {},
+  props: {
+    value:{
+      default:13000
+    },
+    gradientStart:{
+      type:String,
+      default:"#00ffd8"
+    },
+    gradientEnd:{
+      type:String,
+      default:"#0066ff"
+    },
+    radius:{
+      default:128
+    },
+    angelStart:{
+      default:0
+    },
+    angelEnd:{
+      default:Math.PI * 0.5
+    }
+  },
   data() {
     return {};
   },
   methods: {
     draw() {
-      var canvas = document.getElementById("canvas");
+      /* var canvas = document.getElementById("canvas");
       canvas.width = 132;
       canvas.height = 132;
 
-      var context = canvas.getContext("2d");
+      var context = canvas.getContext("2d"); */
+      this.$refs.canvas.width=132
+      this.$refs.canvas.height=132
+      var context = this.$refs.canvas.getContext("2d")
       context.lineCap = "round";
       var gradient = context.createLinearGradient(0, 100, 100, 200);
-      gradient.addColorStop(0, "#00ffd8");
-      gradient.addColorStop(1, "#0066ff");
+      gradient.addColorStop(0, this.gradientStart);
+      gradient.addColorStop(1, this.gradientEnd);
       context.lineWidth = 5;
       context.strokeStyle = gradient;
 
@@ -32,13 +56,15 @@ export default {
       context.arc(64, 64, 60, 0, 2 * Math.PI, true);
       //context.closePath();//如果不是封闭的线条 则会自动帮你封闭
       context.stroke();
-
       //
       context.beginPath();
       context.lineWidth = 15;
       context.arc(64, 64, 60, 0, Math.PI * 0.5, false);
       context.stroke();
     }
+  },
+  mounted(){
+    this.draw()
   }
 };
 </script>
