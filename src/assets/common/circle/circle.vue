@@ -12,7 +12,7 @@
 export default {
   props: {
     value:{
-      default:13000
+      default:0
     },
     gradientStart:{
       type:String,
@@ -29,7 +29,7 @@ export default {
       default:0
     },
     angelEnd:{
-      default:Math.PI * 0.5
+      default: 0.5
     }
   },
   data() {
@@ -53,13 +53,13 @@ export default {
       context.strokeStyle = gradient;
 
       context.beginPath(); //重新规划 不一定要一起出现
-      context.arc(64, 64, 60, 0, 2 * Math.PI, true);
+      context.arc(66, 66, 55, 0, 2 * Math.PI, true);
       //context.closePath();//如果不是封闭的线条 则会自动帮你封闭
       context.stroke();
       //
       context.beginPath();
       context.lineWidth = 15;
-      context.arc(64, 64, 60, 0, Math.PI * 0.5, false);
+      context.arc(66, 66, 55, Math.PI * this.angelStart, Math.PI * this.angelEnd, false);
       context.stroke();
     }
   },

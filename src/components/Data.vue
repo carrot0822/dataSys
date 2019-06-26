@@ -1,6 +1,7 @@
 <template>
   <div id="data" class="main">
     <div id="particles-js"></div>
+    <star></star>
     <section class="header">
       <div class="imgBox">
         <img src="../assets/img/logo@2x.png">
@@ -33,12 +34,14 @@
           <div class="circle-bottom">
             <div class="data-cicle">
               <div class="cicle-normal first">
+                <div class="cicle-border"></div>
                 <div class="cicle-boll">{{borrowObj.yestodayborrow}}</div>
               </div>
               <div class="cicle-text">昨日借出</div>
             </div>
             <div class="data-cicle">
               <div class="cicle-normal">
+                <div class="cicle-border"></div>
                 <div class="cicle-boll">{{borrowObj.yestodayback}}</div>
               </div>
               <span class="cicle-text">昨日还入</span>
@@ -57,26 +60,49 @@
           </div>
           <div class="arrive-cicleBox">
             <div class="Ring-Box">
-              <Ring></Ring>
+              <Ring :value="arrObj.previousMonthcount"></Ring>
               <p class="ring-text">上月到馆</p>
             </div>
             <div class="Ring-Box">
-              <Ring></Ring>
+              <Ring
+                :value="arrObj.tomonthcount"
+                :gradientStart="'#54fffd'"
+                :gradientEnd="'#0066ff'"
+                :angelStart="1.5"
+                :angelEnd="2"
+              ></Ring>
               <p class="ring-text">本月到馆</p>
             </div>
             <div class="Ring-Box">
-              <Ring></Ring>
+              <Ring
+                :value="arrObj.yestodaycount"
+                :gradientStart="'#63a1ff'"
+                :gradientEnd="'#dd54ff'"
+              ></Ring>
               <p class="ring-text">昨日到馆</p>
             </div>
             <div class="Ring-Box">
-              <Ring></Ring>
+              <Ring 
+                :value="arrObj.todaycount" 
+                :gradientStart="'#ff5a00'" 
+                :gradientEnd="'#ffae00'"
+                :angelStart="1.5"
+                :angelEnd="2"
+                ></Ring>
               <p class="ring-text">今日到馆</p>
             </div>
           </div>
         </section>
         <section class="dynamic">
           <p class="smallTitle dynamicTitle">馆内动态</p>
-          <div class="videoBox"></div>
+          <div class="videoBox">
+            <video controls width="400" height="240">
+              <source
+                src="../../public/罪恶之源《逮虾户》听这音乐我简直天不怕地不怕了 [AV 41255069, From JIJIDOWN.COM].mp4"
+                type="video/mp4"
+              >
+            </video>
+          </div>
           <div class="noticeBox">
             <p class="paragraph">
               【图书馆工会开展“中国梦•劳动美”诵读与写诗活动】
@@ -127,7 +153,7 @@
 
           <div class="recommandBox">
             <div class="sliderBox">
-              
+              <carousel></carousel>
             </div>
             <div class="textBox">
               <P class="mb_8">
@@ -149,8 +175,9 @@
 import particlesJs from "particles.js";
 import particlesConfig from "../assets/js/particles.json";
 import Ring from "../assets/common/circle/circle";
+import carousel from "../assets/common/swiper/swiper";
 import { dataInt } from "../Api/api";
-
+import star from '../assets/common/metor/metor'
 export default {
   data() {
     return {
@@ -163,11 +190,14 @@ export default {
       },
       collectArr: [0, 0, 0, 0, 0],
       arriveArr: [0, 0, 0, 0, 0],
-      borrowRank: [],
+      arrObj: {},
+      borrowRank: []
     };
   },
   components: {
     Ring,
+    carousel,
+    star
   },
   methods: {
     init() {
@@ -205,6 +235,7 @@ export default {
       dataInt.arrive().then(res => {
         console.log("到馆总数", res);
         let arriveTotal = res.data.row.totle;
+        this.arrObj = res.data.row;
         this.arriveArr = this._toFilter(arriveTotal, 5);
       });
     },
@@ -233,7 +264,6 @@ export default {
   },
   mounted() {
     this.init();
-    
   },
   beforeDestroy() {
     if (pJSDom && pJSDom.length > 0) {
@@ -321,6 +351,8 @@ body {
               }
               .text {
                 font-size: 16px;
+
+                font-weight: bold;
                 color: #ffffff;
                 margin-right: 34px;
                 text-align: right;
@@ -333,6 +365,12 @@ body {
                 color: #ffffff;
                 width: 260px;
                 text-align: center;
+                height: 68px;
+                line-height: 68px;
+                background-image: url("../assets/img/border.png");
+                background-size: cover;
+                background-position: 50% 50%;
+                background-repeat: no-repeat;
               }
             }
           }
@@ -343,12 +381,20 @@ body {
             .data-cicle {
               text-align: center;
               .cicle-normal {
-                width: 138px;
-                height: 138px;
+                width: 140px;
+                height: 140px;
                 border-radius: 50%;
-                border: 2px dashed #0fc8fd;
+
                 position: relative;
                 margin-bottom: 15px;
+                .cicle-border {
+                  width: 138px;
+                  height: 138px;
+                  border-radius: 50%;
+                  border: 2px dashed #0fc8fd;
+                  position: absolute;
+                  animation: rotate 60s linear 0s infinite normal;
+                }
                 .cicle-boll {
                   width: 110px;
                   height: 110px;
@@ -372,8 +418,9 @@ body {
                 color: #ffffff;
                 font-family: MicrosoftYaHei;
                 font-size: 16px;
+                font-weight: bold;
                 width: 140px;
-                height: 140px;
+
                 text-align: center;
               }
             }
@@ -402,6 +449,7 @@ body {
                 padding-top: 17px;
                 color: #ffffff;
                 font-size: 16px;
+                font-weight: bold;
                 text-align: center;
               }
             }
@@ -425,6 +473,8 @@ body {
           width: 400px;
           height: 240px;
           margin: 0 auto;
+          position: relative;
+          z-index: 10;
           background: #00bf7b;
           margin-bottom: 30px;
         }
@@ -617,6 +667,14 @@ body {
   z-index: 4;
   width: 100%;
   height: 100vh;
+}
+@keyframes rotate {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
 
