@@ -8,11 +8,12 @@
       :perspective="perspective"
       :inverseScaling="scaling"
       :display="display"
+      :border="0"
       >
-      <slide :index="0">第一张图</slide>
+      <slide :index="0"><img src="../../img/cover.jpg"></slide>
       <slide :index="1">第二张图</slide>
       <slide :index="2">第三张图</slide>
-      <slide :index="3">第四张图</slide>
+      
     </carousel-3d>
   </div>
 </template>
@@ -40,4 +41,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+img{
+  width: 100%;
+  height: 100%;
+}
 </style>

@@ -96,12 +96,7 @@
         <section class="dynamic">
           <p class="smallTitle dynamicTitle">馆内动态</p>
           <div class="videoBox">
-            <video controls width="400" height="240">
-              <source
-                src="../../public/罪恶之源《逮虾户》听这音乐我简直天不怕地不怕了 [AV 41255069, From JIJIDOWN.COM].mp4"
-                type="video/mp4"
-              >
-            </video>
+            
           </div>
           <div class="noticeBox">
             <p class="paragraph">
