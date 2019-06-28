@@ -10,18 +10,32 @@
       :display="display"
       :border="0"
       >
-      <slide :index="0"><img src="../../img/cover.jpg"></slide>
-      <slide :index="1">第二张图</slide>
-      <slide :index="2">第三张图</slide>
-      
+      <!-- <slide v-for="(item,index) of imgBox" :key="index" :index="index">
+        <img :src="item.showImg"></slide> -->  
+        <slide  :index="0">
+        <img :src="imgBox[0].showImg">
+        </slide>
+        <slide  :index="1">
+        <img :src="imgBox[1].showImg">
+        </slide>
+        <slide  :index="2">
+        <img :src="imgBox[2].showImg">
+        </slide>
     </carousel-3d>
   </div>
 </template>
 
 <script>
 import { Carousel3d, Slide } from "vue-carousel-3d";
+
 export default {
+  props: {
+      imgBox:{
+        type:Array,
+      }
+  },
   data(){
+    
     return{
       space:60,
       height:130,

@@ -1,7 +1,7 @@
 <template>
   <div id="data" class="main">
     <div id="particles-js"></div>
-    <star></star>
+
     <section class="header">
       <div class="imgBox">
         <img src="../assets/img/logo@2x.png">
@@ -82,22 +82,20 @@
               <p class="ring-text">昨日到馆</p>
             </div>
             <div class="Ring-Box">
-              <Ring 
-                :value="arrObj.todaycount" 
-                :gradientStart="'#ff5a00'" 
+              <Ring
+                :value="arrObj.todaycount"
+                :gradientStart="'#ff5a00'"
                 :gradientEnd="'#ffae00'"
                 :angelStart="1.5"
                 :angelEnd="2"
-                ></Ring>
+              ></Ring>
               <p class="ring-text">今日到馆</p>
             </div>
           </div>
         </section>
         <section class="dynamic">
           <p class="smallTitle dynamicTitle">馆内动态</p>
-          <div class="videoBox">
-            
-          </div>
+          <div class="videoBox"></div>
           <div class="noticeBox">
             <p class="paragraph">
               【图书馆工会开展“中国梦•劳动美”诵读与写诗活动】
@@ -148,16 +146,17 @@
 
           <div class="recommandBox">
             <div class="sliderBox">
-              <carousel></carousel>
+              <carousel :imgBox="propArr"></carousel>
             </div>
-            <div class="textBox">
-              <P class="mb_8">
-                <span class="rankNumber">1</span>
-                <span class="bookName">《悲惨世界》</span>
-                —— 雨果
-                <span></span>
-              </P>
-              <p class="ml_24">人民文学出版社</p>
+            <div class="bookList">
+              <div class="textBox" v-for="(item,index) of propArr" :key="index">
+                <span class="rankNumber">{{index+1}}.</span>
+                <div class="book-content">
+                  <P>原作名:{{item.name}}</P>
+                  <p>作者:{{item.author}}</p>
+                  <p>出版社:{{item.press}}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -171,8 +170,8 @@ import particlesJs from "particles.js";
 import particlesConfig from "../assets/js/particles.json";
 import Ring from "../assets/common/circle/circle";
 import carousel from "../assets/common/swiper/swiper";
-import { dataInt } from "../Api/api";
-import star from '../assets/common/metor/metor'
+import { dataInt, preImg } from "../Api/api";
+
 export default {
   data() {
     return {
@@ -186,13 +185,13 @@ export default {
       collectArr: [0, 0, 0, 0, 0],
       arriveArr: [0, 0, 0, 0, 0],
       arrObj: {},
-      borrowRank: []
+      borrowRank: [],
+      propArr: []
     };
   },
   components: {
     Ring,
-    carousel,
-    star
+    carousel
   },
   methods: {
     init() {
@@ -234,6 +233,14 @@ export default {
         this.arriveArr = this._toFilter(arriveTotal, 5);
       });
     },
+    // 书籍推荐书目
+    _search() {
+      dataInt.search().then(res => {
+        console.log("这个数据");
+        this.propArr = this._searchFilter(res.data.row);
+        console.log('推荐书目',this.propArr)
+      });
+    },
     /*------ API数据过滤函数 ------*/
     _rankFilter(arr) {},
     _toFilter(value, number) {
@@ -249,6 +256,19 @@ export default {
       strArr.splice(-3, 0, false);
       console.log("过滤后的数组", strArr, length, number);
       return strArr;
+    },
+    _searchFilter(arr) {
+      if (arr == null) {
+        return [];
+      }
+      
+      for (let item of arr) {
+        let showImg = preImg + item.cover;
+        item.showImg = showImg;
+        
+      }
+      
+      return arr;
     }
   },
   created() {
@@ -256,6 +276,7 @@ export default {
     this._borrow();
     this._borrowTotal();
     this._arrive();
+    this._search();
   },
   mounted() {
     this.init();
@@ -598,18 +619,32 @@ body {
                 height: 110px;
               }
             }
+            .bookList{
+              
+            }
             .textBox {
-              font-size: 16px;
+              font-size: 13px;
+              line-height: 16px;
               color: #ffffff;
+              display: flex;
+              flex-direction: row;
+              margin-bottom: 5px;
+              .book-content{
+                p{
+                  max-width:180px;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap; 
+                }
+                
+              }
               .rankNumber {
-                width: 19px;
-                height: 19px;
-                border-radius: 50%;
+                
                 display: inline-block;
                 text-align: center;
-                line-height: 19px;
+                
                 font-size: 16px;
-                background-color: #6b071a;
+               
               }
             }
           }
