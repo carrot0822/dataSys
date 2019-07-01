@@ -95,7 +95,11 @@
         </section>
         <section class="dynamic">
           <p class="smallTitle dynamicTitle">馆内动态</p>
-          <div class="videoBox"></div>
+          <div class="videoBox">
+            <video :src="videoArr[0]" controls width="400" height="240">
+
+            </video>
+          </div>
           <div class="noticeBox">
             <p class="paragraph">
               【图书馆工会开展“中国梦•劳动美”诵读与写诗活动】
@@ -149,7 +153,7 @@
               <carousel :imgBox="propArr"></carousel>
             </div>
             <div class="bookList">
-              <div class="textBox" v-for="(item,index) of propArr" :key="index">
+              <div class="textBox" v-for="(item,index) of bookArr" :key="index">
                 <span class="rankNumber">{{index+1}}.</span>
                 <div class="book-content">
                   <P>原作名:{{item.name}}</P>
@@ -170,7 +174,7 @@ import particlesJs from "particles.js";
 import particlesConfig from "../assets/js/particles.json";
 import Ring from "../assets/common/circle/circle";
 import carousel from "../assets/common/swiper/swiper";
-import { dataInt, preImg } from "../Api/api";
+import { dataInt, preFile } from "../Api/api";
 
 export default {
   data() {
@@ -182,11 +186,15 @@ export default {
         yestodayback: 0,
         yestodayborrow: 0
       },
-      collectArr: [0, 0, 0, 0, 0],
-      arriveArr: [0, 0, 0, 0, 0],
-      arrObj: {},
-      borrowRank: [],
-      propArr: []
+      defaultSrc:require('../assets/img/cover.jpg'),
+      collectArr: [0, 0, 0, 0, 0], // 馆藏数据
+      arriveArr: [0, 0, 0, 0, 0], // 到馆人数
+      arrObj: {}, // 数组对象
+      borrowRank: [], // 借书排行
+      propArr: [], // 3d轮播图片
+      bookArr:[], // 推荐书籍,
+      noticeArr:[], // 公告
+      videoArr:[]
     };
   },
   components: {
@@ -236,10 +244,22 @@ export default {
     // 书籍推荐书目
     _search() {
       dataInt.search().then(res => {
-        console.log("这个数据");
-        this.propArr = this._searchFilter(res.data.row);
-        console.log('推荐书目',this.propArr)
+        
+        this.bookArr = this._searchFilter(res.data.row);
+        console.log('推荐书目',this.bookArr)
       });
+    },
+    // 公告搜索
+    _notice() {
+      dataInt.notice().then((res) =>{
+        
+        console.log('公告设置',res)
+      })
+    },
+    _video(){
+      dataInt.video().then((res)=>{
+        this.videoArr=this._toVideoFilter(res.data.row)
+      })
     },
     /*------ API数据过滤函数 ------*/
     _rankFilter(arr) {},
@@ -261,14 +281,35 @@ export default {
       if (arr == null) {
         return [];
       }
-      
+      let propArr = [];
       for (let item of arr) {
-        let showImg = preImg + item.cover;
+        let showImg = preFile + item.cover;
         item.showImg = showImg;
         
+        propArr.push(showImg);
       }
-      
+      if(length<3){
+        while(length<3){
+          propArr.push(this.defaultSrc)
+          length++
+        }
+        
+      } 
+      this.propArr = propArr;
+      console.log('图片传递',this.propArr)
       return arr;
+    },
+    _toVideoFilter(arr) {
+      if(arr == null){
+        return
+      }
+      let middle = []
+      for(let item of arr){
+        let str = preFile + item.path
+        middle.push(str)
+      }
+      console.log('视频过滤后',middle,arr)
+      return middle
     }
   },
   created() {
@@ -277,6 +318,8 @@ export default {
     this._borrowTotal();
     this._arrive();
     this._search();
+    this._video(),
+    this._notice()
   },
   mounted() {
     this.init();
@@ -635,6 +678,10 @@ body {
                   overflow: hidden;
                   text-overflow: ellipsis;
                   white-space: nowrap; 
+
+
+
+                  
                 }
                 
               }

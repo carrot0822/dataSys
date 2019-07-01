@@ -2,7 +2,7 @@
 import axios from "axios";
 var url = window.url
 var fileUrl = window.fileUrl
-export const preImg=`${fileUrl}filemodule/showFile/getShow`
+export const preFile=`${fileUrl}filemodule/showFile/getShow`
 
 
 
@@ -12,7 +12,9 @@ const dataUrl = {
     borrow:`${url}indexpage/getNowMonthBorrowCount`, //借阅排行
     borrowCount:`${url}indexpage/getBorrowCount`, //借阅总数
     arrive:`${url}indexpage/getInoutCount`, // 到馆总数
-    search:`${url}indexpage/getReferrBook`,
+    search:`${url}indexpage/getReferrBook`, // 推荐书籍
+    notice:`${url}indexpage/getReferrNotice`, // 公告查询
+    video:`${url}indexpage/getReferrVideo`
 }
 
 export let dataInt = {
@@ -20,18 +22,28 @@ export let dataInt = {
     borrow:borrowInt,
     borrowTotal:borrowCountInt,
     arrive:arriveInt,
-    search:dataSearch
+    search:dataSearch,
+    video:videoSearch,
+    notice:noticeSearch
 }
-export function dataSearch() {
+function videoSearch() {
+    return axios.get(dataUrl.video).then((res) =>{
+         return Promise.resolve(res)
+     })
+ }
+
+function noticeSearch() {
+    return axios.get(dataUrl.notice).then((res) =>{
+         return Promise.resolve(res)
+     })
+ }
+
+ function dataSearch() {
     return axios.get(dataUrl.search).then((res) =>{
          return Promise.resolve(res)
      })
  }
-function getInt(url,value){
-    return axios.get(url,value).then((res)=>{
-        return Promise.resolve(res)
-    })
-}
+
 
 function collectInt(){
     return axios.get(dataUrl.collect).then((res)=>{
