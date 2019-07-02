@@ -193,6 +193,7 @@ import Ring from "../assets/common/circle/circle";
 import carousel from "../assets/common/swiper/swiper";
 import { dataInt, preFile } from "../Api/api";
 import { setTimeout, clearTimeout, setInterval } from "timers";
+import $ from 'jquery'
 const timer = null
 export default {
   data() {
@@ -247,6 +248,8 @@ export default {
       
       }, 100);
     },
+    /*--- 分辨率兼容 ---*/
+
     /*--- 视频播放相关 ---*/
 
     ready() {
@@ -390,10 +393,12 @@ export default {
     this._borrow();
     this._borrowTotal();
     this._arrive();
-    this.loop()
+    //this.loop()
     this._search();
     this._video(), 
     this._notice();
+    console.log('cs',window.screen.display)
+   
   },
   mounted() {
     this.init();
