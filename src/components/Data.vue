@@ -192,8 +192,8 @@ import particlesConfig from "../assets/js/particles.json";
 import Ring from "../assets/common/circle/circle";
 import carousel from "../assets/common/swiper/swiper";
 import { dataInt, preFile } from "../Api/api";
-import { setTimeout } from "timers";
-
+import { setTimeout, clearTimeout, setInterval } from "timers";
+const timer = null
 export default {
   data() {
     return {
@@ -251,11 +251,10 @@ export default {
 
     ready() {
       
-      document.getElementById('video').play()
-      document.getElementById('video').click()
+      
     },
     playNow() {
-      this.$refs.video.muted = false;
+      //this.$refs.video.muted = false;
       //this.$refs.video
       console.log("???");
     },
@@ -375,6 +374,15 @@ export default {
       }
       console.log("视频过滤后", middle, arr);
       return middle;
+    },
+    /*--- 轮询警告 ---*/
+    loop(){
+    var timer =  setInterval(()=>{
+        this._collect();
+        this._borrow();
+        this._borrowTotal();
+        this._arrive();
+      },1000)
     }
   },
   created() {
@@ -382,12 +390,14 @@ export default {
     this._borrow();
     this._borrowTotal();
     this._arrive();
+    this.loop()
     this._search();
-    this._video(), this._notice();
+    this._video(), 
+    this._notice();
   },
   mounted() {
     this.init();
-    //this.scroll();
+    this.scroll();
   },
   beforeDestroy() {
     if (pJSDom && pJSDom.length > 0) {
