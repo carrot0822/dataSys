@@ -4,7 +4,7 @@
 
     <section class="header">
       <div class="imgBox">
-        <img src="../assets/img/logo@2x.png">
+        <img src="../assets/img/logo@2x.png" />
       </div>
       <p class="title">智 能 图 书 馆 实 时 大 数 据</p>
       <div class="usual">
@@ -96,18 +96,35 @@
         <section class="dynamic">
           <p class="smallTitle dynamicTitle">馆内动态</p>
           <div class="videoBox">
-            <video :src="videoArr[0]" controls width="400" height="240">
-
-            </video>
+            <video
+              id="video"
+              @playing="playNow"
+              
+              autoplay="true"
+              muted="true"
+              type="video/mp4"
+              ref="video"
+              @ended="end"
+              @canplay="ready"
+              :src="videoArr[i]"
+              controls
+              width="400"
+              height="240"
+            ></video>
           </div>
-          <div class="noticeBox">
-            <p class="paragraph">
-              【图书馆工会开展“中国梦•劳动美”诵读与写诗活动】
-              图书馆工会根据校工会《关于开展“中国梦•劳动美”职工
-              学习习近平新时代中国特色社会主义思想诵读活动的通知》
-              组织开展以“中国梦·劳动美”为主题的学习习近平新时代
-              中国特色社会主义思想诵读和写诗作活动。
-            </p>
+          <div id="noticeInfo" class="noticeBox">
+            <div id="info1" class="info1">
+              <section v-for="(item,index) of noticeArr" :key="index" class="paragraph">
+                <p class="title">【{{item.title}}】</p>
+                <p class="notice-content">{{item.content}}</p>
+              </section>
+            </div>
+            <div id="info2" class="info2">
+              <section v-for="(item,index) of noticeArr" :key="index" class="paragraph">
+                <p class="title">【{{item.title}}】</p>
+                <p class="notice-content">{{item.content}}</p>
+              </section>
+            </div>
           </div>
         </section>
       </div>
@@ -119,13 +136,13 @@
           <div class="rank">
             <p class="rankList" v-for="(item,index) of borrowRank" :key="index">
               <span v-if="index==0" class="imgBox">
-                <img src="../assets/img/rank1.png">
+                <img src="../assets/img/rank1.png" />
               </span>
               <span v-if="index==1" class="imgBox">
-                <img src="../assets/img/rank2.png">
+                <img src="../assets/img/rank2.png" />
               </span>
               <span v-if="index==2" class="imgBox">
-                <img src="../assets/img/rank3.png">
+                <img src="../assets/img/rank3.png" />
               </span>
               <span class="bookName">{{item.name}}</span>
               <span class="mr_15">作者</span>
@@ -175,6 +192,7 @@ import particlesConfig from "../assets/js/particles.json";
 import Ring from "../assets/common/circle/circle";
 import carousel from "../assets/common/swiper/swiper";
 import { dataInt, preFile } from "../Api/api";
+import { setTimeout } from "timers";
 
 export default {
   data() {
@@ -186,15 +204,16 @@ export default {
         yestodayback: 0,
         yestodayborrow: 0
       },
-      defaultSrc:require('../assets/img/cover.jpg'),
+      defaultSrc: require("../assets/img/cover.jpg"),
       collectArr: [0, 0, 0, 0, 0], // 馆藏数据
       arriveArr: [0, 0, 0, 0, 0], // 到馆人数
       arrObj: {}, // 数组对象
       borrowRank: [], // 借书排行
       propArr: [], // 3d轮播图片
-      bookArr:[], // 推荐书籍,
-      noticeArr:[], // 公告
-      videoArr:[]
+      bookArr: [], // 推荐书籍,
+      noticeArr: [], // 公告
+      videoArr: [],
+      i: 0
     };
   },
   components: {
@@ -204,6 +223,51 @@ export default {
   methods: {
     init() {
       particlesJS("particles-js", particlesConfig);
+    },
+    scroll() {
+      var c1 = document.getElementById("info1");
+      
+      var ca = document.getElementById("noticeInfo");
+      
+      var cas = null;
+      window.onload = function() {
+        if (ca.scrollTop >= c1.offsetHeight) {
+          ca.scrollTop = 0; //归0会有一个明显的动作 而第二个框和第一个框一样是为了骗眼
+        } else {
+          ca.scrollTop++;
+        }
+      };
+      cas = setInterval(() => {
+        if (ca.scrollTop >= c1.offsetHeight) {
+          
+          ca.scrollTop = 0; //归0会有一个明显的动作 而第二个框和第一个框一样是为了骗眼
+        } else {
+          ca.scrollTop++;
+        }
+      
+      }, 100);
+    },
+    /*--- 视频播放相关 ---*/
+
+    ready() {
+      
+      document.getElementById('video').play()
+      document.getElementById('video').click()
+    },
+    playNow() {
+      this.$refs.video.muted = false;
+      //this.$refs.video
+      console.log("???");
+    },
+    pauseNow(){
+      this.$refs.video.play
+    },
+    end() {
+      this.i++;
+      if (this.i > this.videoArr.length - 1) {
+        this.i = 0;
+        console.log("下一个");
+      }
     },
     /*------ API接口 ------*/
     // 馆藏总数
@@ -244,22 +308,24 @@ export default {
     // 书籍推荐书目
     _search() {
       dataInt.search().then(res => {
-        
         this.bookArr = this._searchFilter(res.data.row);
-        console.log('推荐书目',this.bookArr)
+        console.log("推荐书目", this.bookArr);
       });
     },
     // 公告搜索
     _notice() {
-      dataInt.notice().then((res) =>{
-        
-        console.log('公告设置',res)
-      })
+      dataInt.notice().then(res => {
+        if (res.data.row == null) {
+          return;
+        }
+        this.noticeArr = res.data.row;
+        console.log("公告设置", res);
+      });
     },
-    _video(){
-      dataInt.video().then((res)=>{
-        this.videoArr=this._toVideoFilter(res.data.row)
-      })
+    _video() {
+      dataInt.video().then(res => {
+        this.videoArr = this._toVideoFilter(res.data.row);
+      });
     },
     /*------ API数据过滤函数 ------*/
     _rankFilter(arr) {},
@@ -285,31 +351,30 @@ export default {
       for (let item of arr) {
         let showImg = preFile + item.cover;
         item.showImg = showImg;
-        
+
         propArr.push(showImg);
       }
-      if(length<3){
-        while(length<3){
-          propArr.push(this.defaultSrc)
-          length++
+      if (length < 3) {
+        while (length < 3) {
+          propArr.push(this.defaultSrc);
+          length++;
         }
-        
-      } 
+      }
       this.propArr = propArr;
-      console.log('图片传递',this.propArr)
+      console.log("图片传递", this.propArr);
       return arr;
     },
     _toVideoFilter(arr) {
-      if(arr == null){
-        return
+      if (arr == null) {
+        return;
       }
-      let middle = []
-      for(let item of arr){
-        let str = preFile + item.path
-        middle.push(str)
+      let middle = [];
+      for (let item of arr) {
+        let str = preFile + item.path;
+        middle.push(str);
       }
-      console.log('视频过滤后',middle,arr)
-      return middle
+      console.log("视频过滤后", middle, arr);
+      return middle;
     }
   },
   created() {
@@ -318,11 +383,11 @@ export default {
     this._borrowTotal();
     this._arrive();
     this._search();
-    this._video(),
-    this._notice()
+    this._video(), this._notice();
   },
   mounted() {
     this.init();
+    //this.scroll();
   },
   beforeDestroy() {
     if (pJSDom && pJSDom.length > 0) {
@@ -534,11 +599,13 @@ body {
           margin: 0 auto;
           position: relative;
           z-index: 10;
-          background: #00bf7b;
+
           margin-bottom: 30px;
         }
         .noticeBox {
           width: 400px;
+          height: 160px;
+          overflow: hidden;
           margin: 0 auto;
           position: relative;
           .paragraph {
@@ -548,15 +615,19 @@ body {
             color: #ffffff;
             text-indent: 10px;
             text-align: justify;
-          }
-          &::before {
-            content: "";
-            background: #ff482a;
-            width: 11px;
-            height: 11px;
-            border-radius: 50%;
-            position: absolute;
-            top: 6px;
+            position: relative;
+            
+            .title {
+            }
+            &::before {
+              content: "";
+              background: #ff482a;
+              width: 11px;
+              height: 11px;
+              border-radius: 50%;
+              position: absolute;
+              top: 6px;
+            }
           }
         }
       }
@@ -662,8 +733,7 @@ body {
                 height: 110px;
               }
             }
-            .bookList{
-              
+            .bookList {
             }
             .textBox {
               font-size: 13px;
@@ -672,26 +742,19 @@ body {
               display: flex;
               flex-direction: row;
               margin-bottom: 5px;
-              .book-content{
-                p{
-                  max-width:180px;
+              .book-content {
+                p {
+                  max-width: 180px;
                   overflow: hidden;
                   text-overflow: ellipsis;
-                  white-space: nowrap; 
-
-
-
-                  
+                  white-space: nowrap;
                 }
-                
               }
               .rankNumber {
-                
                 display: inline-block;
                 text-align: center;
-                
+
                 font-size: 16px;
-               
               }
             }
           }
