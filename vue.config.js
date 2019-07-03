@@ -3,9 +3,9 @@ function resolve (dir) {
     return path.join(__dirname, dir)
 }
 module.exports = {
-    lintOnSave: true,
+    /* lintOnSave: true,
     chainWebpack: (config)=>{
         config.resolve.alias
             .set('jquery', resolve('jquery/dist/jquery.min.js'))        
-    }
+    } */
 }

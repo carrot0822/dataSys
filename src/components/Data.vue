@@ -99,7 +99,6 @@
             <video
               id="video"
               @playing="playNow"
-              
               autoplay="true"
               muted="true"
               type="video/mp4"
@@ -193,8 +192,8 @@ import Ring from "../assets/common/circle/circle";
 import carousel from "../assets/common/swiper/swiper";
 import { dataInt, preFile } from "../Api/api";
 import { setTimeout, clearTimeout, setInterval } from "timers";
-import $ from 'jquery'
-const timer = null
+import $ from "jquery";
+const timer = null;
 export default {
   data() {
     return {
@@ -227,9 +226,9 @@ export default {
     },
     scroll() {
       var c1 = document.getElementById("info1");
-      
+
       var ca = document.getElementById("noticeInfo");
-      
+
       var cas = null;
       window.onload = function() {
         if (ca.scrollTop >= c1.offsetHeight) {
@@ -240,29 +239,23 @@ export default {
       };
       cas = setInterval(() => {
         if (ca.scrollTop >= c1.offsetHeight) {
-          
           ca.scrollTop = 0; //归0会有一个明显的动作 而第二个框和第一个框一样是为了骗眼
         } else {
           ca.scrollTop++;
         }
-      
       }, 100);
     },
-    /*--- 分辨率兼容 ---*/
 
     /*--- 视频播放相关 ---*/
 
-    ready() {
-      
-      
-    },
+    ready() {},
     playNow() {
       //this.$refs.video.muted = false;
       //this.$refs.video
       console.log("???");
     },
-    pauseNow(){
-      this.$refs.video.play
+    pauseNow() {
+      this.$refs.video.play;
     },
     end() {
       this.i++;
@@ -379,30 +372,122 @@ export default {
       return middle;
     },
     /*--- 轮询警告 ---*/
-    loop(){
-    var timer =  setInterval(()=>{
+    loop() {
+      var timer = setInterval(() => {
         this._collect();
         this._borrow();
         this._borrowTotal();
         this._arrive();
-      },1000)
-    }
+      }, 1000);
+    },
+    /*--- 分辨率兼容 ---*/
+    resizeWidth() {
+      var ratio =
+        $(window).width() / 1920;
+      $(".main").css({
+        zoom:ratio,
+        transformOrigin: "left top",
+        transform:scale(ratio)
+      });
+      console.log(
+        "ratio",
+        ratio,
+        $(window).width(),
+        window.screen.width,
+        $("body").width()
+      );
+    },
+    resizeCenter() {
+      if (!window.screen.height || !window.screen.width){
+        return this.resizeCenterBak();
+      }
+      console.log('你还会执行吗')
+      var ratio = $(window).height() / window.screen.height;
+      $("body").css({
+        transform: "scale(" + ratio + ")",
+        transformOrigin: "left top",
+        backgroundSize:
+          100 * ((window.screen.width / $(window).width()) * ratio) +
+          "%" +
+          " 100%",
+        backgroundPosition:
+          ($(window).width() - $("body").width() * ratio) / 2 + "px top",
+        marginLeft: ($(window).width() - $("body").width() * ratio) / 2
+      });
+      console.log(
+        "ratio",
+        ratio,
+        $(window).width(),
+        window.screen.width,
+        $("body").width()
+      );
+    },
+    resizeCenterBak() {
+      var ratioX = $(window).width() / $("body").width();
+      var ratioY = $(window).height() / $("body").height();
+      console.log($(window).height(),$("body").height(),'为啥除不尽')
+      var ratio = Math.min(ratioX, ratioY);
+      console.log('第二种',ratioX,ratioY)
+      $("body").css({
+        transform: "scale(" + ratio + ")",
+        transformOrigin: "left top",
+        backgroundSize: (1 / ratioX) * 100 * ratio + "%",
+        backgroundPosition: ($(window).width() - $('body').width() * ratio) / 2 + "px top",
+        marginLeft: ($(window).width() - $('body').width() * ratio) / 2
+      });
+      console.log(
+        "ratio",
+        ratio,
+        $(window).width(),
+        window.screen.width,
+        $("body").width()
+      );
+    },
+    resizeFull() {
+    if (!window.screen.height || !window.screen.width) return this.resizeFullBak();
+    var ratioX = $(window).width() / window.screen.width;
+    var ratioY = $(window).height() / window.screen.height;
+    $('body').css({
+      transform: "scale(" + ratioX + ", " + ratioY + ")",
+      transformOrigin: "left top",
+      backgroundSize: "100% 100%"
+    });
+  },
+  resizeFullBak(){
+    var ratioX = $(window).width() / $('body').width();
+    var ratioY = $(window).height() / $('body').height();
+    $('body').css({
+      transform: "scale(" + ratioX + ", " + ratioY + ")",
+      transformOrigin: "left top",
+      backgroundSize: "100% " + ratioY * 100 + "%"
+    });
+  }
   },
   created() {
     this._collect();
     this._borrow();
     this._borrowTotal();
     this._arrive();
-    //this.loop()
+    this.loop()
     this._search();
-    this._video(), 
-    this._notice();
-    console.log('cs',window.screen.display)
-   
+    this._video(), this._notice();
+    console.log("cs", window.screen.display);
+    console.log("jq？", $("body"));
+    
   },
   mounted() {
     this.init();
     this.scroll();
+    
+    let that = this
+    $(window, document).resize(function () {
+    that.resizeWidth();
+  }).load(function () {
+    that.resizeWidth();
+  });
+  setTimeout(function () {
+    that.resizeWidth();
+  }, 10 * 1000);
   },
   beforeDestroy() {
     if (pJSDom && pJSDom.length > 0) {
@@ -416,7 +501,7 @@ export default {
 <style lang="scss" scoped>
 body {
   .main {
-    min-height: 100vh;
+    /*min-height: 100vh;*/
 
     .header {
       height: 91px;
@@ -631,7 +716,7 @@ body {
             text-indent: 10px;
             text-align: justify;
             position: relative;
-            
+
             .title {
             }
             &::before {
@@ -642,6 +727,7 @@ body {
               border-radius: 50%;
               position: absolute;
               top: 6px;
+              left:0;
             }
           }
         }

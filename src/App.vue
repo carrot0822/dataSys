@@ -20,10 +20,10 @@ export default {
   
 }
 body{
-  /*
-  height: 100vh;
+  
+  
   overflow: hidden;
-  */
+  
   
   background-image: url("./assets/img/bg1.jpg");
     background-size: cover;
