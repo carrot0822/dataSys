@@ -23,7 +23,7 @@ body{
   
   
   overflow: hidden;
-  
+  height: 100vh;
   
   background-image: url("./assets/img/bg1.jpg");
     background-size: cover;

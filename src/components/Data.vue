@@ -16,6 +16,9 @@
     <section class="content">
       <div class="contentBox">
         <section class="circulate">
+          <div class="topImgBox">
+            <img src="../assets/img/cir.png" >
+          </div>
           <p class="title">文献流通</p>
           <div class="dataBase">
             <div class="dataBox">
@@ -49,11 +52,14 @@
           </div>
         </section>
         <section class="arrive">
+          <div class="topImgBox">
+            <img src="../assets/img/cir.png" >
+          </div>
           <p class="smallTitle arriveTitle">累计到馆人数</p>
           <div class="mb_60 commonNumber">
             <div v-for="(item,index) of arriveArr" :key="index">
-              <div v-if="item" class="com-numberBox">{{item}}</div>
-              <div v-if="!item" class="dot">
+              <div v-if="item !='dot'" class="com-numberBox">{{item}}</div>
+              <div v-if="item == 'dot'" class="dot">
                 <span class="dotNorm">,</span>
               </div>
             </div>
@@ -94,6 +100,9 @@
           </div>
         </section>
         <section class="dynamic">
+          <div class="topImgBox">
+            <img src="../assets/img/cir.png" >
+          </div>
           <p class="smallTitle dynamicTitle">馆内动态</p>
           <div class="videoBox">
             <video
@@ -131,8 +140,14 @@
     <section class="footer">
       <div class="footerBox">
         <div class="borrow backgrond">
+           <div class="topImgBox">
+            <img src="../assets/img/cir.png" >
+          </div>
           <p class="smallTitle borrowTitle">本月借阅排行榜</p>
-          <div class="rank">
+          <div v-if="!borrowRank.length" class="rank">
+            <p style="color:#fff">暂无数据0.0</p>
+          </div>
+          <div v-if="borrowRank.length" class="rank">
             <p class="rankList" v-for="(item,index) of borrowRank" :key="index">
               <span v-if="index==0" class="imgBox">
                 <img src="../assets/img/rank1.png" />
@@ -151,17 +166,23 @@
           </div>
         </div>
         <div class="collect backgrond">
+           <div class="topImgBox">
+            <img src="../assets/img/cir.png" >
+          </div>
           <p class="smallTitle collectTitle">馆藏总量</p>
           <div class="commonNumber">
             <div v-for="(item,index) of collectArr" :key="index">
-              <div v-if="item" class="com-numberBox">{{item}}</div>
-              <div v-if="!item" class="dot">
+              <div v-if="item !='dot'" class="com-numberBox">{{item}}</div>
+              <div v-if="item == 'dot'" class="dot">
                 <span class="dotNorm">,</span>
               </div>
             </div>
           </div>
         </div>
         <div class="recommand backgrond">
+           <div class="topImgBox">
+            <img src="../assets/img/cir.png" >
+          </div>
           <p class="smallTitle recommandTitle">书籍推荐</p>
 
           <div class="recommandBox">
@@ -193,7 +214,11 @@ import carousel from "../assets/common/swiper/swiper";
 import { dataInt, preFile } from "../Api/api";
 import { setTimeout, clearTimeout, setInterval } from "timers";
 import $ from "jquery";
-const timer = null;
+import { win32 } from 'path';
+var timer = null;
+var borrowTimer = null
+var totalTimer = null
+var arriveTimer = null
 export default {
   data() {
     return {
@@ -205,15 +230,16 @@ export default {
         yestodayborrow: 0
       },
       defaultSrc: require("../assets/img/cover.jpg"),
-      collectArr: [0, 0, 0, 0, 0], // 馆藏数据
-      arriveArr: [0, 0, 0, 0, 0], // 到馆人数
+      collectArr: [0, 0, 0,'dot', 0, 0], // 馆藏数据
+      arriveArr: [0, 0, 0,'dot', 0, 0], // 到馆人数
       arrObj: {}, // 数组对象
       borrowRank: [], // 借书排行
       propArr: [], // 3d轮播图片
       bookArr: [], // 推荐书籍,
       noticeArr: [], // 公告
       videoArr: [],
-      i: 0
+      i: 0,
+      count:0, // 定时器记数
     };
   },
   components: {
@@ -267,37 +293,48 @@ export default {
     /*------ API接口 ------*/
     // 馆藏总数
     _collect() {
+      let that = this
+      window.clearTimeout(timer)
       dataInt.collect().then(res => {
         if (res.data.state) {
-          console.log("馆藏总数", res);
+          if(res.data.row)
           this.collectArr = this._toFilter(res.data.row, 5);
+          this.count++
+          timer = window.setTimeout(this._collect,1000)
+          console.log(this.count,timer)
         } else {
         }
       });
     },
     // 借阅排行
     _borrow() {
+      window.clearTimeout(borrowTimer)
       dataInt.borrow().then(res => {
         this.borrowRank = res.data.row;
+        borrowTimer = window.setTimeout(this._borrow,1000)
         console.log("借阅排行", res);
       });
     },
     // 借阅总数
     _borrowTotal() {
+      window.clearTimeout(totalTimer)
       dataInt.borrowTotal().then(res => {
         if (res.data.state) {
           this.borrowObj = res.data.row;
         }
+        totalTimer = window.setTimeout(this._borrowTotal,1000)
         console.log("借阅总数", res);
       });
     },
     // 到馆总数
     _arrive() {
+      window.clearTimeout(arriveTimer)
       dataInt.arrive().then(res => {
         console.log("到馆总数", res);
         let arriveTotal = res.data.row.totle;
         this.arrObj = res.data.row;
         this.arriveArr = this._toFilter(arriveTotal, 5);
+        arriveTimer = window.setTimeout(this._arrive,1000)
       });
     },
     // 书籍推荐书目
@@ -334,7 +371,7 @@ export default {
 
         length++;
       }
-      strArr.splice(-3, 0, false);
+      strArr.splice(-3, 'dot', false);
       console.log("过滤后的数组", strArr, length, number);
       return strArr;
     },
@@ -378,7 +415,7 @@ export default {
         this._borrow();
         this._borrowTotal();
         this._arrive();
-      }, 1000);
+      }, 10*1000);
     },
     /*--- 分辨率兼容 ---*/
     resizeWidth() {
@@ -387,7 +424,7 @@ export default {
       $(".main").css({
         zoom:ratio,
         transformOrigin: "left top",
-        transform:scale(ratio)
+        
       });
       console.log(
         "ratio",
@@ -464,11 +501,11 @@ export default {
   }
   },
   created() {
-    this._collect();
+    /* this._collect();
     this._borrow();
     this._borrowTotal();
-    this._arrive();
-    this.loop()
+    this._arrive(); */
+    
     this._search();
     this._video(), this._notice();
     console.log("cs", window.screen.display);
@@ -482,9 +519,9 @@ export default {
     let that = this
     $(window, document).resize(function () {
     that.resizeWidth();
-  }).load(function () {
+  }).on('load',function(){
     that.resizeWidth();
-  });
+  })
   setTimeout(function () {
     that.resizeWidth();
   }, 10 * 1000);
@@ -658,6 +695,7 @@ body {
           background-position: 50% 50%;
           background-repeat: no-repeat;
           background-image: url("../assets/img/方框02@2x.png");
+          position: relative;
           .arriveTitle {
             margin-left: 115px;
             margin-top: 44px;
@@ -687,6 +725,7 @@ body {
           background-repeat: no-repeat;
           width: 519px;
           height: 585px;
+          position: relative;
         }
         .dynamicTitle {
           margin-left: 134px;
@@ -745,11 +784,12 @@ body {
         .borrow {
           width: 515px;
           height: 286px;
+          position: relative;
           background-image: url("../assets/img/方框04@2x.png");
           .borrowTitle {
             margin-left: 121px;
-            margin-top: 51px;
-            margin-bottom: 43px;
+            margin-top: 37px;
+            margin-bottom: 50px;
           }
           .rank {
             width: 100%;
@@ -797,24 +837,26 @@ body {
         }
         /*--- 馆藏总量 ---*/
         .collect {
+          position: relative;
           width: 682px;
           height: 284px;
           background-image: url("../assets/img/方框05@2x.png");
           .collectTitle {
-            margin-top: 45px;
+            margin-top: 37px;
             margin-left: 127px;
-            margin-bottom: 48px;
+            margin-bottom: 53px;
           }
         }
         /*--- 书籍推荐 ---*/
         .recommand {
+          position: relative;
           width: 517px;
           height: 288px;
           background-image: url("../assets/img/方框6@2x.png");
           .recommandTitle {
-            margin-top: 45px;
+            margin-top: 37px;
             margin-left: 127px;
-            margin-bottom: 24px;
+            margin-bottom: 31px;
           }
 
           .recommandBox {
@@ -863,6 +905,11 @@ body {
       }
     }
   }
+}
+.topImgBox{
+  position: absolute;
+  top: -5px;
+  left: -10px;
 }
 .commonNumber {
   display: flex;
