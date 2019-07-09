@@ -17,7 +17,7 @@
       <div class="contentBox">
         <section class="circulate">
           <div class="topImgBox">
-            <img src="../assets/img/cir.png" >
+            <img src="../assets/img/cir.png" />
           </div>
           <p class="title">文献流通</p>
           <div class="dataBase">
@@ -53,7 +53,7 @@
         </section>
         <section class="arrive">
           <div class="topImgBox">
-            <img src="../assets/img/cir.png" >
+            <img src="../assets/img/cir.png" />
           </div>
           <p class="smallTitle arriveTitle">累计到馆人数</p>
           <div class="mb_60 commonNumber">
@@ -101,7 +101,7 @@
         </section>
         <section class="dynamic">
           <div class="topImgBox">
-            <img src="../assets/img/cir.png" >
+            <img src="../assets/img/cir.png" />
           </div>
           <p class="smallTitle dynamicTitle">馆内动态</p>
           <div class="videoBox">
@@ -140,8 +140,8 @@
     <section class="footer">
       <div class="footerBox">
         <div class="borrow backgrond">
-           <div class="topImgBox">
-            <img src="../assets/img/cir.png" >
+          <div class="topImgBox">
+            <img src="../assets/img/cir.png" />
           </div>
           <p class="smallTitle borrowTitle">本月借阅排行榜</p>
           <div v-if="!borrowRank.length" class="rank">
@@ -166,8 +166,8 @@
           </div>
         </div>
         <div class="collect backgrond">
-           <div class="topImgBox">
-            <img src="../assets/img/cir.png" >
+          <div class="topImgBox">
+            <img src="../assets/img/cir.png" />
           </div>
           <p class="smallTitle collectTitle">馆藏总量</p>
           <div class="commonNumber">
@@ -180,8 +180,8 @@
           </div>
         </div>
         <div class="recommand backgrond">
-           <div class="topImgBox">
-            <img src="../assets/img/cir.png" >
+          <div class="topImgBox">
+            <img src="../assets/img/cir.png" />
           </div>
           <p class="smallTitle recommandTitle">书籍推荐</p>
 
@@ -214,11 +214,11 @@ import carousel from "../assets/common/swiper/swiper";
 import { dataInt, preFile } from "../Api/api";
 import { setTimeout, clearTimeout, setInterval } from "timers";
 import $ from "jquery";
-import { win32 } from 'path';
+import { win32 } from "path";
 var timer = null;
-var borrowTimer = null
-var totalTimer = null
-var arriveTimer = null
+var borrowTimer = null;
+var totalTimer = null;
+var arriveTimer = null;
 export default {
   data() {
     return {
@@ -230,8 +230,9 @@ export default {
         yestodayborrow: 0
       },
       defaultSrc: require("../assets/img/cover.jpg"),
-      collectArr: [0, 0, 0,'dot', 0, 0], // 馆藏数据
-      arriveArr: [0, 0, 0,'dot', 0, 0], // 到馆人数
+      collectArr: null, // 馆藏数据
+      defaultArr:[0, 0, 0, "dot", 0, 0],
+      arriveArr: null, // 到馆人数
       arrObj: {}, // 数组对象
       borrowRank: [], // 借书排行
       propArr: [], // 3d轮播图片
@@ -239,7 +240,10 @@ export default {
       noticeArr: [], // 公告
       videoArr: [],
       i: 0,
-      count:0, // 定时器记数
+      count: 0, // 定时器记数
+      /*websocket */
+      wsValue: null,
+
     };
   },
   components: {
@@ -268,16 +272,14 @@ export default {
           ca.scrollTop = 0; //归0会有一个明显的动作 而第二个框和第一个框一样是为了骗眼
         } else {
           ca.scrollTop++;
+          console.log(ca.scrollTop,c1.offsetHeight)
         }
       }, 100);
     },
 
     /*--- 视频播放相关 ---*/
-
     ready() {},
     playNow() {
-      //this.$refs.video.muted = false;
-      //this.$refs.video
       console.log("???");
     },
     pauseNow() {
@@ -290,51 +292,75 @@ export default {
         console.log("下一个");
       }
     },
+    /*------ websocket接口 ------*/
+    wsInit(url){
+      var ws = new WebSocket(url);
+      let that = this;
+      ws.onopen = e => {
+        ws.send("connect");
+        console.log("连接成功");
+      };
+      ws.onmessage = e => {
+        let data= JSON.parse(e.data)
+        if (data.row){
+          this.collectArr = that._toFilter(data.row, 5);
+        } else{
+          this.collectArr = defaultArr
+        }
+        console.log("接收数据", data,e);
+      };
+      ws.onclose = e => {
+        console.log("连接关闭");
+      };
+      ws.onerror = e => {
+        console.log("出错情况");
+      };
+      return ws;
+    },
     /*------ API接口 ------*/
     // 馆藏总数
     _collect() {
-      let that = this
-      window.clearTimeout(timer)
+      let that = this;
+      window.clearTimeout(timer);
       dataInt.collect().then(res => {
         if (res.data.state) {
-          if(res.data.row)
-          this.collectArr = this._toFilter(res.data.row, 5);
-          this.count++
-          timer = window.setTimeout(this._collect,1000)
-          console.log(this.count,timer)
+          if (res.data.row) this.collectArr = this._toFilter(res.data.row, 5);
+          this.count++;
+          timer = window.setTimeout(this._collect, 1000);
+          console.log(this.count, timer);
         } else {
         }
       });
     },
     // 借阅排行
     _borrow() {
-      window.clearTimeout(borrowTimer)
+      window.clearTimeout(borrowTimer);
       dataInt.borrow().then(res => {
         this.borrowRank = res.data.row;
-        borrowTimer = window.setTimeout(this._borrow,1000)
+        borrowTimer = window.setTimeout(this._borrow, 1000);
         console.log("借阅排行", res);
       });
     },
     // 借阅总数
     _borrowTotal() {
-      window.clearTimeout(totalTimer)
+      window.clearTimeout(totalTimer);
       dataInt.borrowTotal().then(res => {
         if (res.data.state) {
           this.borrowObj = res.data.row;
         }
-        totalTimer = window.setTimeout(this._borrowTotal,1000)
+        totalTimer = window.setTimeout(this._borrowTotal, 1000);
         console.log("借阅总数", res);
       });
     },
     // 到馆总数
     _arrive() {
-      window.clearTimeout(arriveTimer)
+      window.clearTimeout(arriveTimer);
       dataInt.arrive().then(res => {
         console.log("到馆总数", res);
         let arriveTotal = res.data.row.totle;
         this.arrObj = res.data.row;
         this.arriveArr = this._toFilter(arriveTotal, 5);
-        arriveTimer = window.setTimeout(this._arrive,1000)
+        arriveTimer = window.setTimeout(this._arrive, 1000);
       });
     },
     // 书籍推荐书目
@@ -371,7 +397,7 @@ export default {
 
         length++;
       }
-      strArr.splice(-3, 'dot', false);
+      strArr.splice(-3, 0, 'dot');
       console.log("过滤后的数组", strArr, length, number);
       return strArr;
     },
@@ -409,22 +435,12 @@ export default {
       return middle;
     },
     /*--- 轮询警告 ---*/
-    loop() {
-      var timer = setInterval(() => {
-        this._collect();
-        this._borrow();
-        this._borrowTotal();
-        this._arrive();
-      }, 10*1000);
-    },
     /*--- 分辨率兼容 ---*/
     resizeWidth() {
-      var ratio =
-        $(window).width() / 1920;
+      var ratio = $(window).width() / 1920;
       $(".main").css({
-        zoom:ratio,
-        transformOrigin: "left top",
-        
+        zoom: ratio,
+        transformOrigin: "left top"
       });
       console.log(
         "ratio",
@@ -435,10 +451,10 @@ export default {
       );
     },
     resizeCenter() {
-      if (!window.screen.height || !window.screen.width){
+      if (!window.screen.height || !window.screen.width) {
         return this.resizeCenterBak();
       }
-      console.log('你还会执行吗')
+      console.log("你还会执行吗");
       var ratio = $(window).height() / window.screen.height;
       $("body").css({
         transform: "scale(" + ratio + ")",
@@ -462,15 +478,16 @@ export default {
     resizeCenterBak() {
       var ratioX = $(window).width() / $("body").width();
       var ratioY = $(window).height() / $("body").height();
-      console.log($(window).height(),$("body").height(),'为啥除不尽')
+      console.log($(window).height(), $("body").height(), "为啥除不尽");
       var ratio = Math.min(ratioX, ratioY);
-      console.log('第二种',ratioX,ratioY)
+      console.log("第二种", ratioX, ratioY);
       $("body").css({
         transform: "scale(" + ratio + ")",
         transformOrigin: "left top",
         backgroundSize: (1 / ratioX) * 100 * ratio + "%",
-        backgroundPosition: ($(window).width() - $('body').width() * ratio) / 2 + "px top",
-        marginLeft: ($(window).width() - $('body').width() * ratio) / 2
+        backgroundPosition:
+          ($(window).width() - $("body").width() * ratio) / 2 + "px top",
+        marginLeft: ($(window).width() - $("body").width() * ratio) / 2
       });
       console.log(
         "ratio",
@@ -481,56 +498,61 @@ export default {
       );
     },
     resizeFull() {
-    if (!window.screen.height || !window.screen.width) return this.resizeFullBak();
-    var ratioX = $(window).width() / window.screen.width;
-    var ratioY = $(window).height() / window.screen.height;
-    $('body').css({
-      transform: "scale(" + ratioX + ", " + ratioY + ")",
-      transformOrigin: "left top",
-      backgroundSize: "100% 100%"
-    });
-  },
-  resizeFullBak(){
-    var ratioX = $(window).width() / $('body').width();
-    var ratioY = $(window).height() / $('body').height();
-    $('body').css({
-      transform: "scale(" + ratioX + ", " + ratioY + ")",
-      transformOrigin: "left top",
-      backgroundSize: "100% " + ratioY * 100 + "%"
-    });
-  }
+      if (!window.screen.height || !window.screen.width)
+        return this.resizeFullBak();
+      var ratioX = $(window).width() / window.screen.width;
+      var ratioY = $(window).height() / window.screen.height;
+      $("body").css({
+        transform: "scale(" + ratioX + ", " + ratioY + ")",
+        transformOrigin: "left top",
+        backgroundSize: "100% 100%"
+      });
+    },
+    resizeFullBak() {
+      var ratioX = $(window).width() / $("body").width();
+      var ratioY = $(window).height() / $("body").height();
+      $("body").css({
+        transform: "scale(" + ratioX + ", " + ratioY + ")",
+        transformOrigin: "left top",
+        backgroundSize: "100% " + ratioY * 100 + "%"
+      });
+    }
   },
   created() {
     /* this._collect();
     this._borrow();
     this._borrowTotal();
     this._arrive(); */
-    
+    this.wsInit('ws://192.168.2.31:8089/ws/indexpage/getLibraryTotleCount')
     this._search();
     this._video(), this._notice();
     console.log("cs", window.screen.display);
     console.log("jq？", $("body"));
-    
   },
   mounted() {
     this.init();
     this.scroll();
-    
-    let that = this
-    $(window, document).resize(function () {
-    that.resizeWidth();
-  }).on('load',function(){
-    that.resizeWidth();
-  })
-  setTimeout(function () {
-    that.resizeWidth();
-  }, 10 * 1000);
+
+    let that = this;
+    $(window, document)
+      .resize(function() {
+        that.resizeWidth();
+      })
+      .on("load", function() {
+        that.resizeWidth();
+      });
+    setTimeout(function() {
+      that.resizeWidth();
+    }, 10 * 1000);
   },
   beforeDestroy() {
     if (pJSDom && pJSDom.length > 0) {
       pJSDom[0].pJS.fn.vendors.destroypJS();
       pJSDom = [];
     }
+  },
+  destroyed() {
+    this.wsValue.close();
   }
 };
 </script>
@@ -743,7 +765,7 @@ body {
         }
         .noticeBox {
           width: 400px;
-          height: 160px;
+          height: 120px;
           overflow: hidden;
           margin: 0 auto;
           position: relative;
@@ -766,7 +788,7 @@ body {
               border-radius: 50%;
               position: absolute;
               top: 6px;
-              left:0;
+              left: 0;
             }
           }
         }
@@ -906,7 +928,7 @@ body {
     }
   }
 }
-.topImgBox{
+.topImgBox {
   position: absolute;
   top: -5px;
   left: -10px;
