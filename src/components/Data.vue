@@ -23,29 +23,29 @@
           <div class="dataBase">
             <div class="dataBox">
               <div class="text">当前借出</div>
-              <div class="number">{{borrowObj.todayborrow}}</div>
+              <div class="number">{{_borrow.todayborrow}}</div>
             </div>
             <div class="dataBox">
               <div class="text">当前还入</div>
-              <div class="number">{{borrowObj.todayback}}</div>
+              <div class="number">{{_borrow.todayback}}</div>
             </div>
             <div class="dataBox">
               <div class="text">累计今年借阅量</div>
-              <div class="number">{{borrowObj.yearborrow}}</div>
+              <div class="number">{{_borrow.yearborrow}}</div>
             </div>
           </div>
           <div class="circle-bottom">
             <div class="data-cicle">
               <div class="cicle-normal first">
                 <div class="cicle-border"></div>
-                <div class="cicle-boll">{{borrowObj.yestodayborrow}}</div>
+                <div class="cicle-boll">{{_borrow.yestodayborrow}}</div>
               </div>
               <div class="cicle-text">昨日借出</div>
             </div>
             <div class="data-cicle">
               <div class="cicle-normal">
                 <div class="cicle-border"></div>
-                <div class="cicle-boll">{{borrowObj.yestodayback}}</div>
+                <div class="cicle-boll">{{_borrow.yestodayback}}</div>
               </div>
               <span class="cicle-text">昨日还入</span>
             </div>
@@ -57,7 +57,7 @@
           </div>
           <p class="smallTitle arriveTitle">累计到馆人数</p>
           <div class="mb_60 commonNumber">
-            <div v-for="(item,index) of arriveArr" :key="index">
+            <div v-for="(item,index) of _allArive" :key="index">
               <div v-if="item !='dot'" class="com-numberBox">{{item}}</div>
               <div v-if="item == 'dot'" class="dot">
                 <span class="dotNorm">,</span>
@@ -66,12 +66,12 @@
           </div>
           <div class="arrive-cicleBox">
             <div class="Ring-Box">
-              <Ring :value="arrObj.previousMonthcount"></Ring>
+              <Ring :value="_arriveObj.previousMonthcount"></Ring>
               <p class="ring-text">上月到馆</p>
             </div>
             <div class="Ring-Box">
               <Ring
-                :value="arrObj.tomonthcount"
+                :value="_arriveObj.tomonthcount"
                 :gradientStart="'#54fffd'"
                 :gradientEnd="'#0066ff'"
                 :angelStart="1.5"
@@ -81,7 +81,7 @@
             </div>
             <div class="Ring-Box">
               <Ring
-                :value="arrObj.yestodaycount"
+                :value="_arriveObj.yestodaycount"
                 :gradientStart="'#63a1ff'"
                 :gradientEnd="'#dd54ff'"
               ></Ring>
@@ -89,7 +89,7 @@
             </div>
             <div class="Ring-Box">
               <Ring
-                :value="arrObj.todaycount"
+                :value="_arriveObj.todaycount"
                 :gradientStart="'#ff5a00'"
                 :gradientEnd="'#ffae00'"
                 :angelStart="1.5"
@@ -171,7 +171,7 @@
           </div>
           <p class="smallTitle collectTitle">馆藏总量</p>
           <div class="commonNumber">
-            <div v-for="(item,index) of collectArr" :key="index">
+            <div v-for="(item,index) of _collect" :key="index">
               <div v-if="item !='dot'" class="com-numberBox">{{item}}</div>
               <div v-if="item == 'dot'" class="dot">
                 <span class="dotNorm">,</span>
@@ -229,12 +229,21 @@ export default {
         yestodayback: 0,
         yestodayborrow: 0
       },
+      // 累计到馆人数默认值
+      allObj:{
+        previousMonthcount:0,
+        tomonthcount:0,
+        yestodaycount:0,
+        todaycount:0
+      },
       defaultSrc: require("../assets/img/cover.jpg"),
+      circleObj: null, // 文献流通
+      totel:null, // 总到馆人数数组
+      arriveObj: null, // 累计到馆人数
       collectArr: null, // 馆藏数据
-      defaultArr:[0, 0, 0, "dot", 0, 0],
-      arriveArr: null, // 到馆人数
-      arrObj: {}, // 数组对象
-      borrowRank: [], // 借书排行
+      borrowRank: [], // 本月借阅排行
+      libAll:null, // 馆藏总量
+      defaultArr:[0, 0, 0, "dot", 0, 0], // 默认数据
       propArr: [], // 3d轮播图片
       bookArr: [], // 推荐书籍,
       noticeArr: [], // 公告
@@ -243,12 +252,49 @@ export default {
       count: 0, // 定时器记数
       /*websocket */
       wsValue: null,
-
+      heartValue:null
     };
   },
   components: {
     Ring,
     carousel
+  },
+  computed:{
+    // 馆藏总量
+    _collect(){
+      if(this.libAll !=null && this.libAll != ''){
+        let arr = this._toFilter(this.libAll,5)
+        return arr
+      } else{
+        
+        return this.defaultArr
+      }
+      console.log(this._collect)
+    },
+    // 文献流通
+    _borrow(){
+      if(this.circleObj !=null && this.circleObj != ''){
+        return this.circleObj
+      } else{
+        return this.borrowObj
+      }
+    },
+    _allArive(){
+      if(this.totel !=null && this.totel != ''){
+        let arr = this._toFilter(this.totel,5)
+        return arr
+      } else{
+        return this.defaultArr
+      }
+    },
+    // 其他数据
+    _arriveObj(){
+      if(this.arriveObj !=null && this.arriveObj != ''){
+        return this.arriveObj
+      } else{
+        return this.allObj
+      }
+    }
   },
   methods: {
     init() {
@@ -272,7 +318,7 @@ export default {
           ca.scrollTop = 0; //归0会有一个明显的动作 而第二个框和第一个框一样是为了骗眼
         } else {
           ca.scrollTop++;
-          console.log(ca.scrollTop,c1.offsetHeight)
+          
         }
       }, 100);
     },
@@ -302,12 +348,28 @@ export default {
       };
       ws.onmessage = e => {
         let data= JSON.parse(e.data)
-        if (data.row){
-          this.collectArr = that._toFilter(data.row, 5);
-        } else{
-          this.collectArr = defaultArr
+        
+        //  文献流通
+         if(data.borrowCount !=''){
+          that.circleObj = data.borrowCount.row
+          console.log('文献流通',that.circleObj)
         }
-        console.log("接收数据", data,e);
+        // 累计到馆人数
+        if(data.inoutCount !=''){
+          that.arriveObj  = data.inoutCount.row
+          that.totel = data.inoutCount.row.totel
+        }
+        // 借阅排行
+        if(data.nowMonthBorrowCount !=''){
+          that.borrowRank = data.nowMonthBorrowCount.row
+        }
+        // 馆藏总量
+        if(data.libraryTotleCount !='' ){
+          that.libAll = data.libraryTotleCount.row
+          
+        }
+        
+        console.log("接收数据", data);
       };
       ws.onclose = e => {
         console.log("连接关闭");
@@ -317,52 +379,48 @@ export default {
       };
       return ws;
     },
-    /*------ API接口 ------*/
-    // 馆藏总数
-    _collect() {
-      let that = this;
-      window.clearTimeout(timer);
-      dataInt.collect().then(res => {
-        if (res.data.state) {
-          if (res.data.row) this.collectArr = this._toFilter(res.data.row, 5);
-          this.count++;
-          timer = window.setTimeout(this._collect, 1000);
-          console.log(this.count, timer);
+    // 重新连接
+    reconnect() {
+      var that = this;
+      if (this.reconnectStatus) {
+        return;
+      }
+      that.reconnectStatus = true;
+      if (that.timeoutnum) {
+        clearTimeout(that.timeoutnum);
+      }
+      that.timeoutNum = setTimeout(() => {
+        that.wsValue = that.init("ws://127.0.0.0:7181");
+        that.reconnectStatus = false;
+      }, 5000);
+      //that.timeoutnum && clearTimeout(that.timeoutnum);可读性极差
+    },
+    // 心跳开始
+    webstart() {
+      var self = this;
+      // 检测定时器是否存在 清除定时器
+      self.timeoutObj && clearTimeout(self.timeoutObj);
+      self.serverTimeOutObj && clearTimeout(self.serverTimeOutObj);
+      self.timeoutObj = setTimeout(res => {
+        if (self.wsValue.readyState == 1) {
+          self.wsValue.send("heartcheck");
         } else {
+          self.reconnect();
         }
-      });
+        // 超时关闭
+        self.serverTimeOutObj = setTimeout(res => {
+          self.wsValue.close();
+        }, self.timeout);
+      }, self.timeout);
     },
-    // 借阅排行
-    _borrow() {
-      window.clearTimeout(borrowTimer);
-      dataInt.borrow().then(res => {
-        this.borrowRank = res.data.row;
-        borrowTimer = window.setTimeout(this._borrow, 1000);
-        console.log("借阅排行", res);
-      });
+    // 心跳重置
+    webreset() {
+      var that = this;
+      clearTimeout(that.timeoutObj);
+      clearTimeout(that.serverTimeOutObj);
+      that.start();
     },
-    // 借阅总数
-    _borrowTotal() {
-      window.clearTimeout(totalTimer);
-      dataInt.borrowTotal().then(res => {
-        if (res.data.state) {
-          this.borrowObj = res.data.row;
-        }
-        totalTimer = window.setTimeout(this._borrowTotal, 1000);
-        console.log("借阅总数", res);
-      });
-    },
-    // 到馆总数
-    _arrive() {
-      window.clearTimeout(arriveTimer);
-      dataInt.arrive().then(res => {
-        console.log("到馆总数", res);
-        let arriveTotal = res.data.row.totle;
-        this.arrObj = res.data.row;
-        this.arriveArr = this._toFilter(arriveTotal, 5);
-        arriveTimer = window.setTimeout(this._arrive, 1000);
-      });
-    },
+    /*------ API接口 ------*/
     // 书籍推荐书目
     _search() {
       dataInt.search().then(res => {
@@ -386,7 +444,6 @@ export default {
       });
     },
     /*------ API数据过滤函数 ------*/
-    _rankFilter(arr) {},
     _toFilter(value, number) {
       let str = String(value);
       let strArr = str.split("");
@@ -519,15 +576,11 @@ export default {
     }
   },
   created() {
-    /* this._collect();
-    this._borrow();
-    this._borrowTotal();
-    this._arrive(); */
-    this.wsInit('ws://192.168.2.31:8089/ws/indexpage/getLibraryTotleCount')
+    
+    this.wsInit('ws://192.168.2.31:8089/ws/indexpage/pushMessage')
     this._search();
-    this._video(), this._notice();
-    console.log("cs", window.screen.display);
-    console.log("jq？", $("body"));
+    this._video();
+    this._notice();
   },
   mounted() {
     this.init();
@@ -918,7 +971,6 @@ body {
               .rankNumber {
                 display: inline-block;
                 text-align: center;
-
                 font-size: 16px;
               }
             }
