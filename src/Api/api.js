@@ -3,11 +3,12 @@ import axios from "axios";
 var url = window.url
 var fileUrl = window.fileUrl
 export const preFile=`${fileUrl}filemodule/showFile/getShow`
-
+export const wsUrl=window.wsUrl
 
 
 
 const dataUrl = {
+    
     collect:`${url}indexpage/getLibraryTotleCount`, //馆藏总数
     borrow:`${url}indexpage/getNowMonthBorrowCount`, //借阅排行
     borrowCount:`${url}indexpage/getBorrowCount`, //借阅总数

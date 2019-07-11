@@ -8,9 +8,10 @@
       </div>
       <p class="title">智 能 图 书 馆 实 时 大 数 据</p>
       <div class="usual">
-        <span>2019年06月13日</span>
+        <p>测试websocket连接使用数据,请忽略{{time}}</p>
+        <!-- <span>2019年06月13日</span>
         <span>今日天气</span>
-        <span>今日温度</span>
+        <span>今日温度</span> -->
       </div>
     </section>
     <section class="content">
@@ -211,7 +212,7 @@ import particlesJs from "particles.js";
 import particlesConfig from "../assets/js/particles.json";
 import Ring from "../assets/common/circle/circle";
 import carousel from "../assets/common/swiper/swiper";
-import { dataInt, preFile } from "../Api/api";
+import { dataInt, preFile,wsUrl } from "../Api/api";
 import { setTimeout, clearTimeout, setInterval } from "timers";
 import $ from "jquery";
 import { win32 } from "path";
@@ -230,20 +231,20 @@ export default {
         yestodayborrow: 0
       },
       // 累计到馆人数默认值
-      allObj:{
-        previousMonthcount:0,
-        tomonthcount:0,
-        yestodaycount:0,
-        todaycount:0
+      allObj: {
+        previousMonthcount: 0,
+        tomonthcount: 0,
+        yestodaycount: 0,
+        todaycount: 0
       },
       defaultSrc: require("../assets/img/cover.jpg"),
       circleObj: null, // 文献流通
-      totel:null, // 总到馆人数数组
+      totel: null, // 总到馆人数数组
       arriveObj: null, // 累计到馆人数
       collectArr: null, // 馆藏数据
       borrowRank: [], // 本月借阅排行
-      libAll:null, // 馆藏总量
-      defaultArr:[0, 0, 0, "dot", 0, 0], // 默认数据
+      libAll: null, // 馆藏总量
+      defaultArr: [0, 0, 0, "dot", 0, 0], // 默认数据
       propArr: [], // 3d轮播图片
       bookArr: [], // 推荐书籍,
       noticeArr: [], // 公告
@@ -251,48 +252,56 @@ export default {
       i: 0,
       count: 0, // 定时器记数
       /*websocket */
-      wsValue: null,
-      heartValue:null
+      wsValue: null, // webSocket对象
+      heartValue: null,
+      sendTime: 10 * 1000, // 发送ping包时间
+      timeout: 10 * 1000, // 连接超时时间
+      timeoutObj: null, // 发送ping包定时器
+      serverTimeOutObj: null, // 服务器检测定时器 在规定时间内未被清除则执行
+      timeoutNum: null, // 重连定时器
+      reconnectStatus: false, // 重连状态
+      reconnectTime:5*1000,
+      limit: 0, // 重连次数限制
+      time:null
     };
   },
   components: {
     Ring,
     carousel
   },
-  computed:{
+  computed: {
     // 馆藏总量
-    _collect(){
-      if(this.libAll !=null && this.libAll != ''){
-        let arr = this._toFilter(this.libAll,5)
-        return arr
-      } else{
-        
-        return this.defaultArr
+    _collect() {
+      if (this.libAll != null && this.libAll != "") {
+        let arr = this._toFilter(this.libAll, 5);
+        return arr;
+      } else {
+        return this.defaultArr;
       }
-      console.log(this._collect)
+      console.log(this._collect);
     },
     // 文献流通
-    _borrow(){
-      if(this.circleObj !=null && this.circleObj != ''){
-        return this.circleObj
-      } else{
-        return this.borrowObj
+    _borrow() {
+      if (this.circleObj != null && this.circleObj != "") {
+        return this.circleObj;
+      } else {
+        return this.borrowObj;
       }
     },
-    _allArive(){
-      if(this.totel !=null && this.totel != ''){
-        let arr = this._toFilter(this.totel,5)
-        return arr
-      } else{
-        return this.defaultArr
+    _allArive() {
+      if (this.totel != null && this.totel != "") {
+        let arr = this._toFilter(this.totel, 5);
+        return arr;
+      } else {
+        return this.defaultArr;
       }
     },
     // 其他数据
-    _arriveObj(){
-      if(this.arriveObj !=null && this.arriveObj != ''){
-        return this.arriveObj
-      } else{
-        return this.allObj
+    _arriveObj() {
+      if (this.arriveObj != null && this.arriveObj != "") {
+        return this.arriveObj;
+      } else {
+        return this.allObj;
       }
     }
   },
@@ -318,7 +327,6 @@ export default {
           ca.scrollTop = 0; //归0会有一个明显的动作 而第二个框和第一个框一样是为了骗眼
         } else {
           ca.scrollTop++;
-          
         }
       }, 100);
     },
@@ -339,49 +347,59 @@ export default {
       }
     },
     /*------ websocket接口 ------*/
-    wsInit(url){
+    wsInit(url) {
       var ws = new WebSocket(url);
       let that = this;
       ws.onopen = e => {
         ws.send("connect");
         console.log("连接成功");
+        that.webstart();
       };
       ws.onmessage = e => {
-        let data= JSON.parse(e.data)
-        
-        //  文献流通
-         if(data.borrowCount !=''){
-          that.circleObj = data.borrowCount.row
-          console.log('文献流通',that.circleObj)
+        console.log("再次接收", e);
+        that.time = Date()
+        if (e.data == "heartcheck" && e.data != null) {
+          that.webstart();
+        } else {
+          let data = JSON.parse(e.data);
+          // 检测信息来源
+          //  文献流通
+          if (data.borrowCount != "") {
+            that.circleObj = data.borrowCount.row;
+            console.log("文献流通", that.circleObj);
+          }
+          // 累计到馆人数
+          if (data.inoutCount != "") {
+            that.arriveObj = data.inoutCount.row;
+            that.totel = data.inoutCount.row.totel;
+          }
+          // 借阅排行
+          if (data.nowMonthBorrowCount != "") {
+            that.borrowRank = data.nowMonthBorrowCount.row;
+          }
+          // 馆藏总量
+          if (data.libraryTotleCount != "") {
+            that.libAll = data.libraryTotleCount.row;
+          }
         }
-        // 累计到馆人数
-        if(data.inoutCount !=''){
-          that.arriveObj  = data.inoutCount.row
-          that.totel = data.inoutCount.row.totel
-        }
-        // 借阅排行
-        if(data.nowMonthBorrowCount !=''){
-          that.borrowRank = data.nowMonthBorrowCount.row
-        }
-        // 馆藏总量
-        if(data.libraryTotleCount !='' ){
-          that.libAll = data.libraryTotleCount.row
-          
-        }
-        
+
         console.log("接收数据", data);
       };
       ws.onclose = e => {
         console.log("连接关闭");
+        this.reconnect()
       };
       ws.onerror = e => {
         console.log("出错情况");
+        this.reconnectStatus = true
+        this.reconnect()
       };
       return ws;
     },
     // 重新连接
     reconnect() {
       var that = this;
+      console.log('尝试重连')
       if (this.reconnectStatus) {
         return;
       }
@@ -390,7 +408,9 @@ export default {
         clearTimeout(that.timeoutnum);
       }
       that.timeoutNum = setTimeout(() => {
-        that.wsValue = that.init("ws://127.0.0.0:7181");
+        that.wsValue = that.wsInit(
+          wsUrl
+        );
         that.reconnectStatus = false;
       }, 5000);
       //that.timeoutnum && clearTimeout(that.timeoutnum);可读性极差
@@ -398,15 +418,18 @@ export default {
     // 心跳开始
     webstart() {
       var self = this;
+      console.log("连接状态", self.wsValue.readyState);
       // 检测定时器是否存在 清除定时器
       self.timeoutObj && clearTimeout(self.timeoutObj);
       self.serverTimeOutObj && clearTimeout(self.serverTimeOutObj);
+      console.log('定时器',self.timeoutObj,self.serverTimeOutObj)
       self.timeoutObj = setTimeout(res => {
         if (self.wsValue.readyState == 1) {
           self.wsValue.send("heartcheck");
         } else {
           self.reconnect();
         }
+        console.log("心跳时间");
         // 超时关闭
         self.serverTimeOutObj = setTimeout(res => {
           self.wsValue.close();
@@ -421,6 +444,39 @@ export default {
       that.start();
     },
     /*------ API接口 ------*/
+    // 文献流通
+    _borrowTotal() {
+      dataInt.borrowTotal().then(res => {
+        if (res.data.state) {
+          this.circleObj = res.data.row;
+        }
+        
+        console.log("文献流通", res);
+      });
+    },
+    // 累计到馆人数
+    _arriveAll() {
+      dataInt.arrive().then(res => {
+        console.log("到馆总数", res);
+        that.totel = res.data.row.totle;
+        that.arriveObj = res.data.row;
+      });
+    },
+    // 借阅排行
+    _borrowRank() {
+      dataInt.borrow().then(res => {
+        this.borrowRank = res.data.row;
+        console.log("借阅排行", res);
+      });
+    },
+    // 馆藏总量
+    _collectAll() {
+      dataInt.collect().then(res => {
+        if (res.data.state) {
+          this.libAll = res.data.row;
+        } 
+      });
+    },
     // 书籍推荐书目
     _search() {
       dataInt.search().then(res => {
@@ -454,7 +510,7 @@ export default {
 
         length++;
       }
-      strArr.splice(-3, 0, 'dot');
+      strArr.splice(-3, 0, "dot");
       console.log("过滤后的数组", strArr, length, number);
       return strArr;
     },
@@ -507,77 +563,15 @@ export default {
         $("body").width()
       );
     },
-    resizeCenter() {
-      if (!window.screen.height || !window.screen.width) {
-        return this.resizeCenterBak();
-      }
-      console.log("你还会执行吗");
-      var ratio = $(window).height() / window.screen.height;
-      $("body").css({
-        transform: "scale(" + ratio + ")",
-        transformOrigin: "left top",
-        backgroundSize:
-          100 * ((window.screen.width / $(window).width()) * ratio) +
-          "%" +
-          " 100%",
-        backgroundPosition:
-          ($(window).width() - $("body").width() * ratio) / 2 + "px top",
-        marginLeft: ($(window).width() - $("body").width() * ratio) / 2
-      });
-      console.log(
-        "ratio",
-        ratio,
-        $(window).width(),
-        window.screen.width,
-        $("body").width()
-      );
-    },
-    resizeCenterBak() {
-      var ratioX = $(window).width() / $("body").width();
-      var ratioY = $(window).height() / $("body").height();
-      console.log($(window).height(), $("body").height(), "为啥除不尽");
-      var ratio = Math.min(ratioX, ratioY);
-      console.log("第二种", ratioX, ratioY);
-      $("body").css({
-        transform: "scale(" + ratio + ")",
-        transformOrigin: "left top",
-        backgroundSize: (1 / ratioX) * 100 * ratio + "%",
-        backgroundPosition:
-          ($(window).width() - $("body").width() * ratio) / 2 + "px top",
-        marginLeft: ($(window).width() - $("body").width() * ratio) / 2
-      });
-      console.log(
-        "ratio",
-        ratio,
-        $(window).width(),
-        window.screen.width,
-        $("body").width()
-      );
-    },
-    resizeFull() {
-      if (!window.screen.height || !window.screen.width)
-        return this.resizeFullBak();
-      var ratioX = $(window).width() / window.screen.width;
-      var ratioY = $(window).height() / window.screen.height;
-      $("body").css({
-        transform: "scale(" + ratioX + ", " + ratioY + ")",
-        transformOrigin: "left top",
-        backgroundSize: "100% 100%"
-      });
-    },
-    resizeFullBak() {
-      var ratioX = $(window).width() / $("body").width();
-      var ratioY = $(window).height() / $("body").height();
-      $("body").css({
-        transform: "scale(" + ratioX + ", " + ratioY + ")",
-        transformOrigin: "left top",
-        backgroundSize: "100% " + ratioY * 100 + "%"
-      });
-    }
+    
+
   },
   created() {
-    
-    this.wsInit('ws://192.168.2.31:8089/ws/indexpage/pushMessage')
+    this.wsValue = this.wsInit(wsUrl);
+    this._borrowTotal()
+    this._borrowRank()
+    this._arriveAll()
+    this._collectAll()
     this._search();
     this._video();
     this._notice();
@@ -585,15 +579,19 @@ export default {
   mounted() {
     this.init();
     this.scroll();
-
+    
+    
+    
     let that = this;
     $(window, document)
       .resize(function() {
         that.resizeWidth();
+        $('body').height = $(window).height()
       })
       .on("load", function() {
         that.resizeWidth();
-      });
+      })
+      ;
     setTimeout(function() {
       that.resizeWidth();
     }, 10 * 1000);

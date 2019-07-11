@@ -27,7 +27,7 @@ body{
   
   background-image: url("./assets/img/bg1.jpg");
     background-size: cover;
-    background-position: 50% 50%;
+    
     background-repeat: no-repeat;
     
 }
