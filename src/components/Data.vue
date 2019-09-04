@@ -8,10 +8,10 @@
       </div>
       <p class="title">智 能 图 书 馆 实 时 大 数 据</p>
       <div class="usual">
-        <p>测试websocket连接使用数据,请忽略{{time}}</p>
+        <!--  <p>测试websocket连接使用数据,请忽略{{time}}</p>  -->
         <!-- <span>2019年06月13日</span>
         <span>今日天气</span>
-        <span>今日温度</span> -->
+        <span>今日温度</span>-->
       </div>
     </section>
     <section class="content">
@@ -67,7 +67,7 @@
           </div>
           <div class="arrive-cicleBox">
             <div class="Ring-Box">
-              <Ring :value="_arriveObj.previousMonthcount"></Ring>
+              <Ring :value="_arriveObj.previousMonthcount" :rotate="true"></Ring>
               <p class="ring-text">上月到馆</p>
             </div>
             <div class="Ring-Box">
@@ -75,8 +75,9 @@
                 :value="_arriveObj.tomonthcount"
                 :gradientStart="'#54fffd'"
                 :gradientEnd="'#0066ff'"
-                :angelStart="1.5"
-                :angelEnd="2"
+                :angelStart="1.0"
+                :angelEnd="1.5"
+                :rotate="false"
               ></Ring>
               <p class="ring-text">本月到馆</p>
             </div>
@@ -85,6 +86,8 @@
                 :value="_arriveObj.yestodaycount"
                 :gradientStart="'#63a1ff'"
                 :gradientEnd="'#dd54ff'"
+                :angelStart="1.0"
+                :angelEnd="1.5"
               ></Ring>
               <p class="ring-text">昨日到馆</p>
             </div>
@@ -93,8 +96,9 @@
                 :value="_arriveObj.todaycount"
                 :gradientStart="'#ff5a00'"
                 :gradientEnd="'#ffae00'"
-                :angelStart="1.5"
-                :angelEnd="2"
+                :angelStart="2.0"
+                :angelEnd="2.5"
+                :rotate="false"
               ></Ring>
               <p class="ring-text">今日到馆</p>
             </div>
@@ -121,7 +125,7 @@
               height="240"
             ></video>
           </div>
-          <div id="noticeInfo" class="noticeBox">
+          <div ref="ca" id="noticeInfo" class="noticeBox">
             <div id="info1" class="info1">
               <section v-for="(item,index) of noticeArr" :key="index" class="paragraph">
                 <p class="title">【{{item.title}}】</p>
@@ -212,7 +216,7 @@ import particlesJs from "particles.js";
 import particlesConfig from "../assets/js/particles.json";
 import Ring from "../assets/common/circle/circle";
 import carousel from "../assets/common/swiper/swiper";
-import { dataInt, preFile,wsUrl } from "../Api/api";
+import { dataInt, preFile, wsUrl } from "../Api/api";
 import { setTimeout, clearTimeout, setInterval } from "timers";
 import $ from "jquery";
 import { win32 } from "path";
@@ -260,9 +264,9 @@ export default {
       serverTimeOutObj: null, // 服务器检测定时器 在规定时间内未被清除则执行
       timeoutNum: null, // 重连定时器
       reconnectStatus: false, // 重连状态
-      reconnectTime:5*1000,
+      reconnectTime: 5 * 1000,
       limit: 0, // 重连次数限制
-      time:null
+      time: null
     };
   },
   components: {
@@ -312,22 +316,26 @@ export default {
     scroll() {
       var c1 = document.getElementById("info1");
 
-      var ca = document.getElementById("noticeInfo");
+      var ca = this.$refs.ca
 
       var cas = null;
-      window.onload = function() {
+      clearInterval(cas);
+      
         if (ca.scrollTop >= c1.offsetHeight) {
           ca.scrollTop = 0; //归0会有一个明显的动作 而第二个框和第一个框一样是为了骗眼
         } else {
           ca.scrollTop++;
         }
-      };
+      
       cas = setInterval(() => {
         if (ca.scrollTop >= c1.offsetHeight) {
           ca.scrollTop = 0; //归0会有一个明显的动作 而第二个框和第一个框一样是为了骗眼
+          //console.log("这里不会执行了吧")
         } else {
-          ca.scrollTop++;
+          ++ca.scrollTop;
+          console.log(ca.scrollTop, c1.offsetHeight, "高度检测");
         }
+        
       }, 100);
     },
 
@@ -357,7 +365,7 @@ export default {
       };
       ws.onmessage = e => {
         console.log("再次接收", e);
-        that.time = Date()
+        that.time = Date();
         if (e.data == "heartcheck" && e.data != null) {
           that.webstart();
         } else {
@@ -387,19 +395,19 @@ export default {
       };
       ws.onclose = e => {
         console.log("连接关闭");
-        this.reconnect()
+        this.reconnect();
       };
       ws.onerror = e => {
         console.log("出错情况");
-        this.reconnectStatus = true
-        this.reconnect()
+        this.reconnectStatus = true;
+        this.reconnect();
       };
       return ws;
     },
     // 重新连接
     reconnect() {
       var that = this;
-      console.log('尝试重连')
+      console.log("尝试重连");
       if (this.reconnectStatus) {
         return;
       }
@@ -408,9 +416,7 @@ export default {
         clearTimeout(that.timeoutnum);
       }
       that.timeoutNum = setTimeout(() => {
-        that.wsValue = that.wsInit(
-          wsUrl
-        );
+        that.wsValue = that.wsInit(wsUrl);
         that.reconnectStatus = false;
       }, 5000);
       //that.timeoutnum && clearTimeout(that.timeoutnum);可读性极差
@@ -422,7 +428,7 @@ export default {
       // 检测定时器是否存在 清除定时器
       self.timeoutObj && clearTimeout(self.timeoutObj);
       self.serverTimeOutObj && clearTimeout(self.serverTimeOutObj);
-      console.log('定时器',self.timeoutObj,self.serverTimeOutObj)
+      console.log("定时器", self.timeoutObj, self.serverTimeOutObj);
       self.timeoutObj = setTimeout(res => {
         if (self.wsValue.readyState == 1) {
           self.wsValue.send("heartcheck");
@@ -450,13 +456,14 @@ export default {
         if (res.data.state) {
           this.circleObj = res.data.row;
         }
-        
+
         console.log("文献流通", res);
       });
     },
     // 累计到馆人数
     _arriveAll() {
       dataInt.arrive().then(res => {
+        let that = this;
         console.log("到馆总数", res);
         that.totel = res.data.row.totle;
         that.arriveObj = res.data.row;
@@ -474,7 +481,7 @@ export default {
       dataInt.collect().then(res => {
         if (res.data.state) {
           this.libAll = res.data.row;
-        } 
+        }
       });
     },
     // 书籍推荐书目
@@ -553,25 +560,25 @@ export default {
       var ratio = $(window).width() / 1920;
       $(".main").css({
         zoom: ratio,
-        transformOrigin: "left top"
+        //transformOrigin: "left top"
       });
+      this.$refs.ca.scrollTop++
       console.log(
         "ratio",
         ratio,
         $(window).width(),
         window.screen.width,
-        $("body").width()
+        $("body").width(),
+        this.$refs.ca.scrollTop
       );
-    },
-    
-
+    }
   },
   created() {
     this.wsValue = this.wsInit(wsUrl);
-    this._borrowTotal()
-    this._borrowRank()
-    this._arriveAll()
-    this._collectAll()
+    this._borrowTotal();
+    this._borrowRank();
+    this._arriveAll();
+    this._collectAll();
     this._search();
     this._video();
     this._notice();
@@ -579,22 +586,21 @@ export default {
   mounted() {
     this.init();
     this.scroll();
-    
-    
-    
+
+
     let that = this;
-    $(window, document)
+     $(window, document)
       .resize(function() {
         that.resizeWidth();
-        $('body').height = $(window).height()
+        $("body").height = $(window).height();
+        that.scroll();
       })
       .on("load", function() {
         that.resizeWidth();
-      })
-      ;
+      });
     setTimeout(function() {
       that.resizeWidth();
-    }, 10 * 1000);
+    }, 10 * 1000); 
   },
   beforeDestroy() {
     if (pJSDom && pJSDom.length > 0) {

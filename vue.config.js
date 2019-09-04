@@ -8,4 +8,7 @@ module.exports = {
         config.resolve.alias
             .set('jquery', resolve('jquery/dist/jquery.min.js'))        
     } */
+    devServer: {
+        port: 8090,     // 端口
+    },
 }

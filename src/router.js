@@ -8,6 +8,10 @@ export default new Router({
         {
             path:'/',
             component:()=>import('./components/Data.vue')
+        },
+        {
+            path:"/canvans",
+            component:() =>import('./components/HelloWorld.vue')
         }
     ]
 })

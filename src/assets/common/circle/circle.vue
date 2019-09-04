@@ -30,10 +30,16 @@ export default {
     },
     angelEnd:{
       default: 0.5
+    },
+    rotate:{
+      type:Boolean,
+      default:true,
     }
   },
   data() {
-    return {};
+    return {
+      time:0,
+    };
   },
   methods: {
     draw() {
@@ -42,9 +48,14 @@ export default {
       canvas.height = 132;
 
       var context = canvas.getContext("2d"); */
+      if(this.time == 1){
+        this.time = 0
+        console.log("???")
+      }
       this.$refs.canvas.width=132
       this.$refs.canvas.height=132
       var context = this.$refs.canvas.getContext("2d")
+      context.clearRect(0, 0, 132, 132)
       context.lineCap = "round";
       var gradient = context.createLinearGradient(0, 100, 100, 200);
       gradient.addColorStop(0, this.gradientStart);
@@ -59,8 +70,16 @@ export default {
       //
       context.beginPath();
       context.lineWidth = 15;
-      context.arc(66, 66, 55, Math.PI * this.angelStart, Math.PI * this.angelEnd, false);
+      if(this.rotate){
+        context.arc(66, 66, 55, Math.PI * (this.time + this.angelStart), Math.PI * (this.time + this.angelEnd), false);
+      } else {
+        context.arc(66, 66, 55, -Math.PI * (this.time + this.angelEnd), -Math.PI * (this.time + this.angelStart), false);
+      }
       context.stroke();
+      this.time = this.time + 0.005
+      //console.log(this.time)
+      
+      window.requestAnimationFrame(this.draw);
     }
   },
   mounted(){
