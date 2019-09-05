@@ -12,6 +12,10 @@ export default new Router({
         {
             path:"/canvans",
             component:() =>import('./components/HelloWorld.vue')
+        },
+        {
+            path:"/cube",
+            component:() =>import('./assets/common/cube/cube.vue')
         }
     ]
 })

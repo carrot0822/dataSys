@@ -1,6 +1,17 @@
 <template>
   <div class="hello">
     <canvas width="300" height="300" id="canvas"></canvas>
+    <div class="loop">
+      <swipe
+        v-model="index"
+        :autoplayTime="8000"
+        style="text-align: center; line-height: 80px; height: 100px; background: #42b983;"
+      >
+        <swipe-item style="height: 100px; line-height: 100px">item1</swipe-item>
+        <swipe-item style="height: 100px; line-height: 100px">item2</swipe-item>
+        <swipe-item style="height: 100px; line-height: 100px">item3</swipe-item>
+      </swipe>
+    </div>
   </div>
 </template>
 
@@ -8,13 +19,17 @@
 var sun = new Image();
 var moon = new Image();
 var earth = new Image();
+import "c-swipe/dist/swipe.css";
+import { Swipe, SwipeItem } from "c-swipe";
 export default {
   name: "HelloWorld",
   props: {
     msg: String
   },
   data() {
-    return {};
+    return {
+      index:0
+    };
   },
   methods: {
     init() {
@@ -22,7 +37,7 @@ export default {
       moon.src = "https://mdn.mozillademos.org/files/1443/Canvas_moon.png";
       earth.src = "https://mdn.mozillademos.org/files/1429/Canvas_earth.png";
       window.requestAnimationFrame(this.draw);
-      console.log("???")
+      console.log("???");
     },
     draw() {
       var ctx = document.getElementById("canvas").getContext("2d");
@@ -39,10 +54,10 @@ export default {
         ((2 * Math.PI) / 60) * time.getSeconds() +
           ((2 * Math.PI) / 60000) * time.getMilliseconds()
       );
-      ctx.translate(105, 0);// 原点位置更改
+      ctx.translate(105, 0); // 原点位置更改
       ctx.fillRect(0, -12, 50, 24); // Shadow 绘制已填色的矩形
       ctx.drawImage(earth, -12, -12); // 这里的x，y代表的是位置 参考系是原点
-       // Moon
+      // Moon
       ctx.save();
       ctx.rotate(
         ((2 * Math.PI) / 6) * time.getSeconds() +
@@ -58,10 +73,14 @@ export default {
       ctx.arc(150, 150, 105, 0, Math.PI * 2, false); // Earth orbit
       ctx.stroke();
 
-      ctx.drawImage(sun, 0, 0, 300, 300); 
+      ctx.drawImage(sun, 0, 0, 300, 300);
 
       window.requestAnimationFrame(this.draw);
     }
+  },
+  components: {
+    Swipe,
+    SwipeItem
   },
   created() {
     this.init();

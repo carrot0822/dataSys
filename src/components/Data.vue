@@ -125,7 +125,24 @@
               height="240"
             ></video>
           </div>
-          <div ref="ca" id="noticeInfo" class="noticeBox">
+          <div id="noticeInfo" class="noticeBox">
+            <div id="info1" class="info1">
+              <swipe
+                v-if="noticeArr.length"
+                v-model="index"
+                :autoplayTime="5000"
+                :pagination ="false"
+                
+              >
+                <swipe-item v-for="(item,index) of noticeArr" :key="index" class="paragraph">
+                  <p class="title">【{{item.title}}】</p>
+                  <p class="notice-content">{{item.content}}</p>
+                </swipe-item>
+                
+              </swipe>
+            </div>
+          </div>
+          <!-- <div ref="ca" id="noticeInfo" class="noticeBox">
             <div id="info1" class="info1">
               <section v-for="(item,index) of noticeArr" :key="index" class="paragraph">
                 <p class="title">【{{item.title}}】</p>
@@ -138,7 +155,7 @@
                 <p class="notice-content">{{item.content}}</p>
               </section>
             </div>
-          </div>
+          </div>-->
         </section>
       </div>
     </section>
@@ -218,8 +235,10 @@ import Ring from "../assets/common/circle/circle";
 import carousel from "../assets/common/swiper/swiper";
 import { dataInt, preFile, wsUrl } from "../Api/api";
 import { setTimeout, clearTimeout, setInterval } from "timers";
+import "c-swipe/dist/swipe.css";
+import { Swipe, SwipeItem } from "c-swipe";
 import $ from "jquery";
-import { win32 } from "path";
+
 var timer = null;
 var borrowTimer = null;
 var totalTimer = null;
@@ -227,6 +246,7 @@ var arriveTimer = null;
 export default {
   data() {
     return {
+      index: 0,
       borrowObj: {
         todayback: 0,
         todayborrow: 0,
@@ -271,7 +291,9 @@ export default {
   },
   components: {
     Ring,
-    carousel
+    carousel,
+    Swipe,
+    SwipeItem
   },
   computed: {
     // 馆藏总量
@@ -313,20 +335,20 @@ export default {
     init() {
       particlesJS("particles-js", particlesConfig);
     },
-    scroll() {
+    /* scroll() {
       var c1 = document.getElementById("info1");
 
-      var ca = this.$refs.ca
+      var ca = this.$refs.ca;
 
       var cas = null;
       clearInterval(cas);
-      
-        if (ca.scrollTop >= c1.offsetHeight) {
-          ca.scrollTop = 0; //归0会有一个明显的动作 而第二个框和第一个框一样是为了骗眼
-        } else {
-          ca.scrollTop++;
-        }
-      
+
+      if (ca.scrollTop >= c1.offsetHeight) {
+        ca.scrollTop = 0; //归0会有一个明显的动作 而第二个框和第一个框一样是为了骗眼
+      } else {
+        ca.scrollTop++;
+      }
+
       cas = setInterval(() => {
         if (ca.scrollTop >= c1.offsetHeight) {
           ca.scrollTop = 0; //归0会有一个明显的动作 而第二个框和第一个框一样是为了骗眼
@@ -335,9 +357,8 @@ export default {
           ++ca.scrollTop;
           console.log(ca.scrollTop, c1.offsetHeight, "高度检测");
         }
-        
       }, 100);
-    },
+    }, */
 
     /*--- 视频播放相关 ---*/
     ready() {},
@@ -560,16 +581,15 @@ export default {
       var ratio = $(window).width() / 1920;
       $(".main").css({
         zoom: ratio,
-        //transformOrigin: "left top"
+        transformOrigin: "left top"
       });
-      this.$refs.ca.scrollTop++
+
       console.log(
         "ratio",
         ratio,
         $(window).width(),
         window.screen.width,
-        $("body").width(),
-        this.$refs.ca.scrollTop
+        $("body").width()
       );
     }
   },
@@ -585,11 +605,10 @@ export default {
   },
   mounted() {
     this.init();
-    this.scroll();
-
+    //this.scroll();
 
     let that = this;
-     $(window, document)
+    $(window, document)
       .resize(function() {
         that.resizeWidth();
         $("body").height = $(window).height();
@@ -600,7 +619,7 @@ export default {
       });
     setTimeout(function() {
       that.resizeWidth();
-    }, 10 * 1000); 
+    }, 10 * 1000);
   },
   beforeDestroy() {
     if (pJSDom && pJSDom.length > 0) {

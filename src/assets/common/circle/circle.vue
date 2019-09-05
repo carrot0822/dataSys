@@ -52,9 +52,10 @@ export default {
         this.time = 0
         console.log("???")
       }
+      
+      var context = this.$refs.canvas.getContext("2d")
       this.$refs.canvas.width=132
       this.$refs.canvas.height=132
-      var context = this.$refs.canvas.getContext("2d")
       context.clearRect(0, 0, 132, 132)
       context.lineCap = "round";
       var gradient = context.createLinearGradient(0, 100, 100, 200);
