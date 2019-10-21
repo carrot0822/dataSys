@@ -120,6 +120,7 @@
               @ended="end"
               @canplay="ready"
               :src="videoArr[i]"
+							v-if="videoArr.length"
               controls
               width="400"
               height="240"
@@ -370,10 +371,12 @@ export default {
     },
     end() {
       this.i++;
+			let length = this.videoArr.length
       if (this.i > this.videoArr.length - 1) {
         this.i = 0;
-        console.log("下一个");
+        
       }
+			console.log("下一个",this.i);
     },
     /*------ websocket接口 ------*/
     wsInit(url) {
@@ -525,6 +528,7 @@ export default {
     _video() {
       dataInt.video().then(res => {
         this.videoArr = this._toVideoFilter(res.data.row);
+				console.log(this.videoArr,'这里的视频数组')
       });
     },
     /*------ API数据过滤函数 ------*/
@@ -564,10 +568,11 @@ export default {
       return arr;
     },
     _toVideoFilter(arr) {
+			let middle = [];
       if (arr == null) {
-        return;
+        return middle
       }
-      let middle = [];
+      
       for (let item of arr) {
         let str = preFile + item.path;
         middle.push(str);
@@ -612,7 +617,7 @@ export default {
       .resize(function() {
         that.resizeWidth();
         $("body").height = $(window).height();
-        that.scroll();
+        
       })
       .on("load", function() {
         that.resizeWidth();
