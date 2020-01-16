@@ -10,6 +10,10 @@ export default new Router({
             component:()=>import('./components/Data.vue')
         },
         {
+            path:'*',
+            component:()=>import('./components/Data.vue')
+        },
+        {
             path:"/canvans",
             component:() =>import('./components/HelloWorld.vue')
         },

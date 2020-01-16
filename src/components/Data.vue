@@ -181,6 +181,12 @@
               <span v-if="index==2" class="imgBox">
                 <img src="../assets/img/rank3.png" />
               </span>
+							<span v-if="index==3" class="imgBox">
+							  <img src="../assets/img/rank3.png" />
+							</span>
+							<span v-if="index==4" class="imgBox">
+							  <img src="../assets/img/rank3.png" />
+							</span>
               <span class="bookName">{{item.name}}</span>
               <span class="mr_15">作者</span>
               <span class="author">{{item.author}}</span>
@@ -367,15 +373,20 @@ export default {
       console.log("???");
     },
     pauseNow() {
-      this.$refs.video.play;
+      this.$refs.video.play();
+			console.log('如果暂停的话')
     },
     end() {
-      this.i++;
 			let length = this.videoArr.length
-      if (this.i > this.videoArr.length - 1) {
-        this.i = 0;
-        
-      }
+			
+				this.i++;
+				if (this.i > this.videoArr.length - 1) {
+				  this.i = 0;
+				  
+				}
+				this.$refs.video.play();
+			
+      
 			console.log("下一个",this.i);
     },
     /*------ websocket接口 ------*/
@@ -901,7 +912,7 @@ body {
             .rankList {
               color: #ffffff;
               font-size: 16px;
-              margin-bottom: 15px;
+              margin-bottom: 10px;
               .imgBox {
                 img {
                   vertical-align: bottom;
