@@ -65,7 +65,12 @@ em{
 	font-weight: normal;  
 	  font-style: normal; 
 }
-
+@font-face{
+	font-family: 'UniDreamLED';
+	src: url('./UnidreamLED.ttf');
+	font-weight: normal;  
+	  font-style: normal; 
+}
 
 .mb_60{
 	margin-bottom: 60px;

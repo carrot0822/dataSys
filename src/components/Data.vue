@@ -4,7 +4,8 @@
 
     <section class="header">
       <div class="imgBox">
-        <img src="../assets/img/logo@2x.png" />
+        <!-- <img src="../assets/img/logo@2x.png" /> -->
+        <img src="../assets/img/logo2.png" />
       </div>
       <p class="title">智 能 图 书 馆 实 时 大 数 据</p>
       <div class="usual">
@@ -120,7 +121,7 @@
               @ended="end"
               @canplay="ready"
               :src="videoArr[i]"
-							v-if="videoArr.length"
+              v-if="videoArr.length"
               controls
               width="400"
               height="240"
@@ -132,14 +133,12 @@
                 v-if="noticeArr.length"
                 v-model="index"
                 :autoplayTime="5000"
-                :pagination ="false"
-                
+                :pagination="false"
               >
                 <swipe-item v-for="(item,index) of noticeArr" :key="index" class="paragraph">
                   <p class="title">【{{item.title}}】</p>
                   <p class="notice-content">{{item.content}}</p>
                 </swipe-item>
-                
               </swipe>
             </div>
           </div>
@@ -181,12 +180,12 @@
               <span v-if="index==2" class="imgBox">
                 <img src="../assets/img/rank3.png" />
               </span>
-							<span v-if="index==3" class="imgBox">
-							  <img src="../assets/img/rank3.png" />
-							</span>
-							<span v-if="index==4" class="imgBox">
-							  <img src="../assets/img/rank3.png" />
-							</span>
+              <span v-if="index==3" class="imgBox">
+                <img src="../assets/img/rank3.png" />
+              </span>
+              <span v-if="index==4" class="imgBox">
+                <img src="../assets/img/rank3.png" />
+              </span>
               <span class="bookName">{{item.name}}</span>
               <span class="mr_15">作者</span>
               <span class="author">{{item.author}}</span>
@@ -374,20 +373,18 @@ export default {
     },
     pauseNow() {
       this.$refs.video.play();
-			console.log('如果暂停的话')
+      console.log("如果暂停的话");
     },
     end() {
-			let length = this.videoArr.length
-			
-				this.i++;
-				if (this.i > this.videoArr.length - 1) {
-				  this.i = 0;
-				  
-				}
-				this.$refs.video.play();
-			
-      
-			console.log("下一个",this.i);
+      let length = this.videoArr.length;
+
+      this.i++;
+      if (this.i > this.videoArr.length - 1) {
+        this.i = 0;
+      }
+      this.$refs.video.play();
+
+      console.log("下一个", this.i);
     },
     /*------ websocket接口 ------*/
     wsInit(url) {
@@ -539,7 +536,7 @@ export default {
     _video() {
       dataInt.video().then(res => {
         this.videoArr = this._toVideoFilter(res.data.row);
-				console.log(this.videoArr,'这里的视频数组')
+        console.log(this.videoArr, "这里的视频数组");
       });
     },
     /*------ API数据过滤函数 ------*/
@@ -579,11 +576,11 @@ export default {
       return arr;
     },
     _toVideoFilter(arr) {
-			let middle = [];
+      let middle = [];
       if (arr == null) {
-        return middle
+        return middle;
       }
-      
+
       for (let item of arr) {
         let str = preFile + item.path;
         middle.push(str);
@@ -628,7 +625,6 @@ export default {
       .resize(function() {
         that.resizeWidth();
         $("body").height = $(window).height();
-        
       })
       .on("load", function() {
         that.resizeWidth();
@@ -653,7 +649,13 @@ export default {
 body {
   .main {
     /*min-height: 100vh;*/
+    overflow: hidden;
+    height: 100vh;
 
+    background-image: url("../assets/img/bg1.jpg");
+    background-size: cover;
+
+    background-repeat: no-repeat;
     .header {
       height: 91px;
       background-image: url("../assets/img/标题框@2x.png");
@@ -667,8 +669,13 @@ body {
       .imgBox {
         position: absolute;
         z-index: 2;
-        top: 22px;
-        left: 46px;
+        top: -40px;
+        left: -87px;
+        /*top: 22px;
+        left: 46px;*/
+        img {
+          transform: scale(0.4);
+        }
       }
       .title {
         position: absolute;
