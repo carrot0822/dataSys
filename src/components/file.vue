@@ -375,7 +375,7 @@ export default {
 
     resizeWidth() {
       var ratio = $(window).width() / 1920;
-      $(".main").css({
+      $("#file").css({
         zoom: ratio,
         transformOrigin: "left top"
       });
@@ -503,6 +503,7 @@ export default {
     margin-bottom: 40px;
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
     .first {
       margin-right: 40px;
       .countBox {
