@@ -9,18 +9,20 @@
           <div class="top distance">
             <span class="title">人数统计</span>
           </div>
+          <!-- -->
+          <div class="date"></div>
           <div class="substance">
             <div class="personIn person">
               <p class="part text">进入人数</p>
               <div class="dataBox">
-                <span class="data">10000</span>
+                <span class="data">{{personIn}}</span>
                 <span class="text">人</span>
               </div>
             </div>
             <div class="personOut person">
               <p class="part text">进出人数</p>
               <div class="dataBox">
-                <span class="data">10000</span>
+                <span class="data">{{personOut}}</span>
                 <span class="text">人</span>
               </div>
             </div>
@@ -113,15 +115,47 @@
               ref="video"
               @ended="end"
               @canplay="ready"
-              src
+              :src="videoSrc"
+              :poster="poster"
               controls
+              loop
               width="740"
               height="430"
             ></video>
-            <img class="prevImg" :src="prevImg" width="740" height="430" />
           </div>
         </div>
         <div class="environmentBox">
+          <!-- 库房 -->
+          <section class="formBox">
+            <el-form class="control" ref="form" :inline="true" :model="form" label-width="50px">
+              <el-form-item label>
+                <el-select
+                  @change="changeStore"
+                  v-if="storeArr.length"
+                  v-model="form.store"
+                  placeholder="请选择库房"
+                >
+                  <el-option
+                    v-for="(item,index) in storeArr"
+                    :key="index"
+                    :label="item.storeName"
+                    :value="item.id"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item v-if="regionArr.length" label>
+                <el-select @change="changeRegin" v-model="form.region" placeholder="请选择区">
+                  <el-option
+                    v-for="(item,index) in regionArr"
+                    :key="index"
+                    :label="item.regionName"
+                    :value="item.regionNum"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+            </el-form>
+          </section>
+          <!-- 环境温湿度 -->
           <div class="top distance">
             <span class="title">当前环境值</span>
           </div>
@@ -130,19 +164,19 @@
             <div class="tempBox">
               <div class="ringBox">
                 <div class="ring">
-                  <span class="Num">30.5</span>
+                  <span class="Num">{{temperature}}</span>
                 </div>
                 <p class="des">温度℃</p>
               </div>
               <div class="ringBox">
                 <div class="ring">
-                  <span class="Num">30.5</span>
+                  <span class="Num">{{humidity}}</span>
                 </div>
                 <p class="des">湿度%RH</p>
               </div>
               <div class="ringBox">
                 <div class="ring">
-                  <span class="Num">30.5</span>
+                  <span class="Num">20.8</span>
                 </div>
                 <p class="des">TVOC ug/m³</p>
               </div>
@@ -157,13 +191,13 @@
               </div>
               <div class="ringBox">
                 <div class="ring">
-                  <span class="Num">30.5</span>
+                  <span class="Num">{{PM}}</span>
                 </div>
                 <p class="des">PM2.5 ug/m³</p>
               </div>
               <div class="ringBox">
                 <div class="ring">
-                  <span class="Num">30.5</span>
+                  <span class="Num">10.6</span>
                 </div>
                 <p class="des">CO2 ppm</p>
               </div>
@@ -179,7 +213,7 @@
           <div class="substance">
             <div class="des">单位：&nbsp 本</div>
             <div class="barchart">
-              <bar-chart :height="'280px'" :chartData="chartData"></bar-chart>
+              <bar-chart :height="'280px'" :xAxis="xAxis" :chartData="chartData"></bar-chart>
             </div>
           </div>
         </div>
@@ -204,6 +238,7 @@
                 <P class="time textB">{{item.createTime}}</P>
               </div>
             </div>
+            <div v-if="!logData.length" class="noData">暂无数据</div>
           </div>
         </div>
       </div>
@@ -232,7 +267,8 @@ export default {
       backNow: 0,
       // 第二块
       // 视频链接
-      videoSrc: "",
+      videoSrc: require("../../public/test.mp4"),
+      poster: require("../../public/poster.png"),
       prevImg: "",
       // 温湿度 库房 区 温湿度数据 这里数据最多
       form: {
@@ -244,9 +280,10 @@ export default {
       regionArr: [],
       temperature: 0,
       humidity: 0,
-
+      PM: 0,
       // 第三块
       chartData: [50, 100, 200, 100, 100, 200, 100],
+      xAxis: [], // X轴
       logData: []
     };
   },
@@ -254,18 +291,21 @@ export default {
     barChart
   },
   methods: {
+    // 定时器 后期替换成websocket
+    init() {
+      this._getStore();
+      this._getLog();
+      this._getFile();
+      this._getWeek();
+      this._getPerson();
+    },
     playNow() {},
+    date() {},
     end() {
-      let length = this.videoArr.length;
-
-      this.i++;
-      if (this.i > this.videoArr.length - 1) {
-        this.i = 0;
-      }
-      this.$refs.video.play();
+      console.log("视频加载完了");
     },
     ready() {
-        console.log('准备完毕就把等待图去掉')
+      console.log("准备完毕就把等待图去掉");
     },
     getPercent(num, total) {
       num = parseFloat(num);
@@ -277,6 +317,24 @@ export default {
       return total <= 0
         ? "0%"
         : parseInt(Math.round((num / total) * 10000) / 100.0) + "%";
+    },
+    fileFilter(arr) {
+      let result = {};
+      let chart = [];
+      let xAxis = [];
+      let temp = arr.reverse();
+      for (let item of temp) {
+        chart.push(item.lendCount);
+        xAxis.push(this.dateFilter(item.fileTime));
+      }
+      result.chart = chart;
+      result.xAxis = xAxis;
+      return result;
+    },
+    // 日期过滤函数
+    dateFilter(date) {
+      let result = date.slice(6, 11);
+      return result;
     },
     // 可以整理成数组再渲染- -不过太麻烦了 算了
     _getFile() {
@@ -305,6 +363,35 @@ export default {
           if (res.data.state) {
             this.logData = res.data.rows;
           }
+        });
+    },
+    _getWeek() {
+      axios
+        .get(this.url + "archivesmodule/arcTbFile/getSevenDayInfo")
+        .then(res => {
+          console.log(res, "七天档案");
+          if (res.data.state) {
+            let obj = this.fileFilter(res.data.row.lendInfoList);
+            this.chartData = obj.chart;
+            this.xAxis = obj.xAxis;
+            console.log(obj, "过滤数据");
+          }
+        });
+    },
+    _getPerson() {
+      axios
+        .get(
+          this.url +
+            "doorguardmodule/entranceGuardAlarm/getNowDayPeopleInAndOutInfo"
+        )
+        .then(res => {
+          console.log(res, "进出");
+          if (res.data.state) {
+            let data = res.data.row;
+            this.personIn = data.inCount;
+            this.personOut = data.outCount;
+          }
+          console.log(res, "进出人数", this.storeArr);
         });
     },
     // 库房相关
@@ -347,7 +434,7 @@ export default {
             this.regionArr = res.data.rows;
             this.form.region = res.data.rows[0].regionNum;
 
-            //this._getHumiture();
+            this._getHumiture();
             console.log(this.regionArr, "区数据");
           }
         });
@@ -363,13 +450,12 @@ export default {
       data.qu_num = item.regionNum;
       axios.get(`http://${quIp}/GDL`, { params: data }).then(res => {
         console.log(res, "温湿度");
-        /*
-        this.temperature = res.temperature ? res.temperature : "0";
-        this.humidity = res.humidity ? res.humidity : "0";
-       
-        console.log(this.temperature, this.humidity, "温湿度");
-        */
-        console.log(res, "查询温湿度");
+        if (res.status) {
+          this.temperature = res.temperature ? res.temperature : "0";
+          this.humidity = res.humidity ? res.humidity : "0";
+          this.PM = res.PM ? res.PM : "0";
+          console.log(this.temperature, this.humidity, "温湿度");
+        }
       });
     },
 
@@ -437,6 +523,12 @@ export default {
     this._getStore();
     this._getLog();
     this._getFile();
+    this._getWeek();
+    this._getPerson();
+    setInterval(()=>{
+      this.init()
+      console.log('1s定时器测试')
+    },10000)
     // 获取门禁人数
     // 获取视频播放
     // 获取档案借阅数
@@ -516,6 +608,16 @@ export default {
         position: relative;
         margin-bottom: 40px;
         .distance {
+        }
+        .date {
+          position: absolute;
+          top: 40px;
+          right: 60px;
+          font-size: 14px;
+          font-family: Microsoft YaHei;
+          font-weight: 400;
+          color: rgba(138, 255, 254, 1);
+          text-align: center;
         }
         .substance {
           padding-top: 30px;
@@ -656,6 +758,11 @@ export default {
         width: 820px;
         height: 330px;
         position: relative;
+        .formBox {
+          position: absolute;
+          top: 16px;
+          right: 35px;
+        }
         .distance {
           margin-bottom: 20px;
         }
@@ -683,7 +790,8 @@ export default {
                   color: rgba(255, 255, 255, 1);
                   position: absolute;
                   top: 50%;
-                  left: 26%;
+                  left: 50%;
+                  transform: translateX(-50%);
                 }
               }
               .des {
@@ -768,6 +876,16 @@ export default {
               }
             }
           }
+          .noData {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            font-family: Microsoft YaHei;
+            font-weight: 400;
+            color: rgba(138, 255, 254, 1);
+          }
         }
       }
     }
@@ -784,5 +902,20 @@ export default {
       color: rgba(0, 255, 252, 1);
     }
   }
+}
+</style>
+
+<style>
+#file input.el-input__inner {
+  background-color: rgba(0, 0, 0, 0);
+  background-image: url("../assets/fileImg/input.png");
+  background-size: cover;
+  width: 120px;
+  background-repeat: no-repeat;
+  border: none;
+  font-size: 16px;
+  font-family: Microsoft YaHei;
+  font-weight: 400;
+  color: rgba(138, 255, 254, 1);
 }
 </style>

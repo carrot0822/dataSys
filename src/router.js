@@ -5,16 +5,20 @@ Vue.use(Router)
 export default new Router({
     routes:[
         
+       
         {
             path:'/',
-            component:()=>import('./components/Data.vue')
+            component:()=>import('./components/file.vue')
         },
         {
             path:'/fileData',
             component:()=>import('./components/file.vue')
         },
-        
-        
+        /*
+        {
+            path:'/',
+            component:()=>import('./components/Data.vue')
+        },
         {
             path:"/canvans",
             component:() =>import('./components/HelloWorld.vue')
@@ -23,11 +27,11 @@ export default new Router({
             path:"/cube",
             component:() =>import('./assets/common/cube/cube.vue')
         },
-        /*
+        */
         {
             path:'*',
-            component:()=>import('./components/Data.vue')
+            component:()=>import('./components/file.vue')
         },
-        */
+        
     ]
 })

@@ -26,6 +26,12 @@ export default {
     chartData: {
       type: Array,
       required: true // 必须吗
+    },
+    xAxis:{
+      type:Array,
+      default: function () {
+        return ["周一", "周二", "周三", "周三", "周五",'周六','周日']
+      }
     }
   },
   data() {
@@ -64,6 +70,7 @@ export default {
      * 双折线图
      */
     setOptions(expectedData = {}) {
+      let xData = this.xAxis
       this.chart.setOption({
         color: ["#3398DB"],
         tooltip: {
@@ -83,7 +90,7 @@ export default {
         xAxis: [
           {
             type: "category",
-            data: ["周一", "周二", "周三", "周三", "周五",'周六','周日'],
+            data: xData,
             axisTick: {
               alignWithLabel: true
             }
