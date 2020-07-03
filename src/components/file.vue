@@ -61,9 +61,9 @@
                 </div>
                 <div class="progressPos">
                   <div class="progress">
-                    <div class="change return" :style="{width:borowPer}"></div>
+                    <div class="change return" :style="{width:returnPer}"></div>
                   </div>
-                  <div class="per">{{borowPer}}</div>
+                  <div class="per">{{returnPer}}</div>
                 </div>
               </div>
 
@@ -77,9 +77,9 @@
                 </div>
                 <div class="progressPos">
                   <div class="progress">
-                    <div class="change fileStay" :style="{width:borowPer}"></div>
+                    <div class="change fileStay" :style="{width:filePer}"></div>
                   </div>
-                  <div class="per">{{borowPer}}</div>
+                  <div class="per">{{filePer}}</div>
                 </div>
               </div>
 
@@ -93,9 +93,9 @@
                 </div>
                 <div class="progressPos">
                   <div class="progress">
-                    <div class="change fileOut" :style="{width:borowPer}"></div>
+                    <div class="change fileOut" :style="{width:backPer}"></div>
                   </div>
-                  <div class="per">{{borowPer}}</div>
+                  <div class="per">{{backPer}}</div>
                 </div>
               </div>
             </div>
@@ -211,7 +211,7 @@
             <span class="title">档案借阅数</span>
           </div>
           <div class="substance">
-            <div class="des">单位：&nbsp 本</div>
+            <div class="des">单位：&nbsp 卷</div>
             <div class="barchart">
               <bar-chart :height="'280px'" :xAxis="xAxis" :chartData="chartData"></bar-chart>
             </div>
@@ -282,8 +282,8 @@ export default {
       humidity: 0,
       PM: 0,
       // 第三块
-      chartData: [50, 100, 200, 100, 100, 200, 100],
-      xAxis: [], // X轴
+      chartData: [0, 0, 0, 0, 0, 0, 0],
+      xAxis: ["周一", "周二", "周三", "周三", "周五",'周六','周日'], // X轴
       logData: []
     };
   },

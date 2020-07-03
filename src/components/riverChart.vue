@@ -30,7 +30,7 @@ export default {
     xAxis:{
       type:Array,
       default: function () {
-        return ["周一", "周二", "周三", "周三", "周五",'周六','周日']
+        return ["文书档案", "行政档案", "人事档案", "图文档案", "刑事档案",'刑事档案','经济档案']
       }
     }
   },

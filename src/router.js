@@ -5,16 +5,16 @@ Vue.use(Router)
 export default new Router({
     routes:[
         
-       
+       /*
         {
             path:'/',
             component:()=>import('./components/file.vue')
-        },
+        },*/
         {
             path:'/fileData',
             component:()=>import('./components/file.vue')
         },
-        /*
+        
         {
             path:'/',
             component:()=>import('./components/Data.vue')
@@ -24,14 +24,22 @@ export default new Router({
             component:() =>import('./components/HelloWorld.vue')
         },
         {
+            path:'/river',
+            component:()=>import('./components/river.vue')
+        },
+        {
             path:"/cube",
             component:() =>import('./assets/common/cube/cube.vue')
         },
-        */
+        {
+            path:'/test',
+            component:()=>import('./components/riverLine.vue')
+        },
         {
             path:'*',
             component:()=>import('./components/file.vue')
         },
+        
         
     ]
 })

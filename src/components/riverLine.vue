@@ -25,12 +25,23 @@ export default {
     },
     chartData: {
       type: Array,
-      required: true // 必须吗
+      //required: true, // 必须吗
+      default: function() {
+        return ["20", "10", "10", "5", "16", "26", "-5"];
+      }
     },
-    xAxis:{
-      type:Array,
-      default: function () {
-        return ["周一", "周二", "周三", "周三", "周五",'周六','周日']
+    xAxis: {
+      type: Array,
+      default: function() {
+        return [
+          "文书档案",
+          "行政档案",
+          "人事档案",
+          "图文档案",
+          "刑事档案",
+          "刑事档案",
+          "经济档案"
+        ];
       }
     }
   },
@@ -70,9 +81,15 @@ export default {
      * 双折线图
      */
     setOptions(expectedData = {}) {
-      let xData = this.xAxis
+      let xData = this.xAxis;
       this.chart.setOption({
-        color: ["#3398DB"],
+        color:['#F6FF00','#00DEFF','#00FFAE'], 
+        legend: {
+          data: ["温度", "湿度", "TVOC"],
+          textStyle:{
+              color:['#F6FF00','#00DEFF','#00FFAE']
+          }
+        },
         tooltip: {
           trigger: "axis",
           axisPointer: {
@@ -87,6 +104,7 @@ export default {
           top: "6%",
           containLabel: true
         },
+
         xAxis: [
           {
             type: "category",
@@ -103,31 +121,30 @@ export default {
               show: false
             },
             boundaryGap: ["20%", "20%"],
-            min:0,
-            minInterval: 1,
+
+           
           }
         ],
         series: [
           {
+            name: "温度",
+            type: "line",
+            
+            smooth: false,
+            data: [11, 11, 15, 13, 12, 13, 10]
+          },
+          
+          {
+            name: "湿度",
+            type: "line",
+            smooth: false,
+            data: [1, -2, 2, 5, 3, 2, 0]
+          },
+          {
             data: expectedData,
-            name: "借阅数",
-            itemStyle: {
-              //barBorderRadius: [50, 50, 0, 0],
-              color: function(params) {
-                var colorList = [
-                  "#F6FF00",
-                  "#00FFAE",
-                  "#F6FF00",
-                  "#00FFAE",
-                  "#F6FF00",
-                ];
-                return colorList[params.dataIndex];
-              }
-            },
-            smooth: true,
-            type: "bar",
-            barWidth: "40%",
-
+            name: "TVOC",
+            type: "line",
+            smooth: false,
             animationDuration: 2800,
             animationEasing: "cubicInOut"
           }
