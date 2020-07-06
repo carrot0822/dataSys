@@ -36,6 +36,10 @@ export default new Router({
             component:()=>import('./components/riverLine.vue')
         },
         {
+            path:'/editor',
+            component:()=>import('./components/editor/editor.vue')
+        },
+        {
             path:'*',
             component:()=>import('./components/file.vue')
         },
