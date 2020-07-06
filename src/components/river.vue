@@ -68,11 +68,11 @@
         <!-- 在架档案比 -->
         <div class="percentage">
           <div class="top distance">
-            <span class="title distance">在架档案比</span>
+            <span class="title distance">环境曲线值</span>
           </div>
           <div class="substance">
             <div class="lineChart">
-              <line-chart :height="'380px'" ></line-chart>
+              <line-chart :chartData ="lineChart" :height="'380px'"></line-chart>
             </div>
           </div>
         </div>
@@ -102,42 +102,38 @@
             <span class="title">设备运行状态</span>
           </div>
           <div class="equipBox">
-            <div class="airBox mb_20">
-              <!-- 懒得上伪类 改起来麻烦 -->
-              <div class="air">
+            <div class="airBox mb_20" v-if="airArr.length">
+              <!-- 懒得上伪类 这里写麻烦了 没有接口文档 数据格式估算错误 -->
+              <div class="air" v-for="(item,index) of airArr" :key="index">
                 <div class="circleBox">
                   <div class="outer"></div>
                   <div class="cut">
-                    <div class="center arcColor"></div>
+                    <div :class="['center',item.state == 'on'?'arcColor':'arcError']"></div>
                   </div>
-                  <div class="inter"></div>
+                  <div :class="['inter',item.state == 'on'?'':'errorAdd']" ></div>
                   <div class="iconBox">
-                    <img :src="airImg" />
+                    <img :src="item.state == 'on'?airImg:airError" />
                   </div>
                 </div>
-                <div class="textBox">空调1</div>
+                <div :class="['textBox',item.state == 'on'?'':'errorText']" >{{item.equName}}  {{item.state == 'on'?'':'(故障)'}}</div>
               </div>
-
-              
             </div>
             <!-- 温湿度一体机 -->
-            <div class="airBox">
+            <div class="airBox" v-if="equipArr.length">
               <!-- 懒得上伪类 改起来麻烦 -->
-              <div class="air">
+              <div class="air" v-for="(item,index) of equipArr" :key="index">
                 <div class="circleBox">
                   <div class="outer"></div>
                   <div class="cut">
-                    <div class="center arcError"></div>
+                    <div :class="['center',item.state == 'on'?'arcColor':'arcError']"></div>
                   </div>
-                  <div class="inter"></div>
+                  <div :class="['inter',item.state == 'on'?'':'errorAdd']" ></div>
                   <div class="iconBoxE">
-                    <img :src="equipImg" />
+                    <img :src="item.state == 'on'?equipImg:equipErr" />
                   </div>
                 </div>
-                <div class="textBox">温湿度一体机1</div>
+                <div :class="['textBox',item.state == 'on'?'':'errorText']" >{{item.equName}}  {{item.state == 'on'?'':'(故障)'}}</div>
               </div>
-
-              
             </div>
           </div>
         </div>
@@ -171,7 +167,7 @@
 </template>
 <script>
 import barChart from "./riverChart";
-import lineChart from './riverLine'
+import lineChart from "./riverLine";
 import axios from "axios";
 import $ from "jquery";
 export default {
@@ -190,7 +186,14 @@ export default {
       humidity: 0,
       PM: 0,
       // 环境曲线
-      
+      equipNum: "",
+
+      lineChart: {
+        tempData: [], // 温度
+        humidityData: [], // 湿度
+        TvocData: [], // Tvoc
+        lineTime: [] // X轴
+      },
       // 第二块
       // 文章链接
 
@@ -200,9 +203,12 @@ export default {
       // 第三块
       // 设备状态
       airImg: require("../assets/riverImg/air.png"),
-      airError:require("../assets/riverImg/airErr.png"),
-      equipImg:require("../assets/riverImg/equipment.png"),
-      equipErr:require('../assets/riverImg/equipErr.png'),
+      airError: require("../assets/riverImg/airErr.png"),
+      equipImg: require("../assets/riverImg/equipment.png"),
+      equipErr: require("../assets/riverImg/equipErr.png"),
+      airArr:[],
+      equipArr:[],
+      // 报警日志
       logData: []
     };
   },
@@ -215,9 +221,8 @@ export default {
     init() {
       this._getStore();
       this._getLog();
-      
       this._getWeek();
-      
+      this._getState()
     },
     fileFilter(arr) {
       let result = {};
@@ -237,33 +242,6 @@ export default {
       let result = date.slice(6, 11);
       return result;
     },
-    // 可以整理成数组再渲染- -不过太麻烦了 算了
-    _getLog() {
-      axios
-        .get(
-          this.url + "environment/alarm/selectAlarms?currentPage=1&pageSize=10"
-        )
-        .then(res => {
-          console.log(res, "报警信息");
-          if (res.data.state) {
-            this.logData = res.data.rows;
-          }
-        });
-    },
-    _getWeek() {
-      axios
-        .get(this.url + "archivesmodule/arcTbFile/getSevenDayInfo")
-        .then(res => {
-          console.log(res, "七天档案");
-          if (res.data.state) {
-            let obj = this.fileFilter(res.data.row.lendInfoList);
-            this.chartData = obj.chart;
-            this.xAxis = obj.xAxis;
-            console.log(obj, "过滤数据");
-          }
-        });
-    },
-   
     // 库房相关
     changeStore(val, index) {
       console.log(val, "库房改变");
@@ -328,6 +306,105 @@ export default {
         }
       });
     },
+    // 获取区域控制器编号
+    _getmonitor() {
+      axios
+        .get(this.url + "environment/equipment/selectEquipmentOfCjq")
+        .then(res => {
+          console.log(res, "区域控制器");
+          if (res.data.state) {
+            this.equipNum = res.data.rows[0].equNum;
+            // 开启定时器
+            setInterval(()=>{
+              this._getLine();
+            },3000)
+            
+          }
+        });
+    },
+    // 更新环境曲线
+    _getLine() {
+      let data = {};
+      data.equNum = this.equipNum;
+      axios
+        .get(this.url + "environment/equipment/selectHistoryCjq", {
+          params: data
+        })
+        .then(res => {
+          console.log(res, "温湿度曲线");
+          var len = this.lineChart.tempData.length;
+          if (res.data.state) {
+            // 极有可能出现数据不存在的情况
+            if (res.data.row) {
+              if (len < 100) {
+                this.lineChart.tempData.push(res.data.row.wd);
+                this.lineChart.humidityData.push(res.data.row.sd);
+                this.lineChart.TvocData.push(res.data.row.tvoc);
+                this.lineChart.lineTime.push(res.data.msg);
+              } else {
+                this.lineChart.tempData.shift();
+                this.lineChart.humidityData.shift();
+                this.lineChart.TvocData.shift();
+                this.lineChart.lineTime.shift();
+                //
+                this.lineChart.tempData.push(res.data.row.wd);
+                this.lineChart.humidityData.push(res.data.row.sd);
+                this.lineChart.TvocData.push(res.data.row.tvoc);
+                this.lineChart.lineTime.push(res.data.msg);
+              }
+            } else {
+              console.log(res.data.msg);
+            }
+          }else{
+            console.log('么得数据')
+          }
+        });
+    },
+    // 档案管理制度
+
+     // 档案类型
+    _getWeek() {
+      axios
+        .get(this.url + "archivesmodule/arcTbFile/getSevenDayInfo")
+        .then(res => {
+          console.log(res, "七天档案");
+          if (res.data.state) {
+            let obj = this.fileFilter(res.data.row.lendInfoList);
+            this.chartData = obj.chart;
+            //this.xAxis = obj.xAxis;
+            console.log(obj, "过滤数据");
+          }
+        });
+    },
+    // 设备运行状态
+    _getState(){
+      axios
+        .get(this.url + "environment/equipment/selectEquipments")
+        .then(res => {
+          console.log(res, "设备运行状态");
+          if (res.data.state) {
+            let data = res.data.rows
+            this.airArr = data.filter(item => item.fkTypeCode == 'znkt') 
+            this.equipArr = data.filter(item => item.fkTypeCode == 'wsdytj')
+            
+            console.log(this.airArr,this.equipArr,'过滤结果')
+          }
+        });
+    },
+    // 报警记录
+    _getLog() {
+      axios
+        .get(
+          this.url + "environment/alarm/selectAlarms?currentPage=1&pageSize=10"
+        )
+        .then(res => {
+          console.log(res, "报警信息");
+          if (res.data.state) {
+            this.logData = res.data.rows;
+          }
+        });
+    },
+   
 
     resizeWidth() {
       var ratio = $(window).width() / 1920;
@@ -346,7 +423,6 @@ export default {
     }
   },
   computed: {
-    
     selectStore() {
       var id = this.form.store;
 
@@ -366,16 +442,15 @@ export default {
   },
   created() {
     this.url = window.testUrl;
-    console.log(window.testUrl);
-    this._getStore();
-    this._getLog();
-    
 
+    this.init();
+    this._getmonitor();
+    
+    /*
     setInterval(() => {
       this.init();
       console.log("1s定时器测试");
-    }, 10000);
-
+    }, 10000);*/
   },
   mounted() {
     let that = this;
@@ -394,15 +469,20 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-
-.arcColor{
+.arcColor {
   border: 4px solid #00fffc;
 }
-.arcError{
-  border: 4px solid #FF0000;
+.arcError {
+  border: 4px solid #ff0000;
 }
-
-.mb_20{
+.errorAdd{
+  background-color:#ff0000;
+  border: none!important;
+}
+.errorText{
+  color: #ff0000!important;
+}
+.mb_20 {
   margin-bottom: 20px;
 }
 #file {
@@ -513,7 +593,6 @@ export default {
         }
         .substance {
           padding: 0 24px;
-          
         }
       }
     }
@@ -587,7 +666,6 @@ export default {
                   //left: 50%;
                   //transform: translate(-50%, -50%);
                   border-radius: 50%;
-                  
                 }
                 .inter {
                   position: absolute;
@@ -607,7 +685,7 @@ export default {
                   left: 50%;
                   transform: translate(-50%, -50%);
                 }
-                .iconBoxE{
+                .iconBoxE {
                   width: 20px;
                   height: 26px;
                   position: absolute;

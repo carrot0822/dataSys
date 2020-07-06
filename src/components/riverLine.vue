@@ -24,24 +24,14 @@ export default {
       default: true
     },
     chartData: {
-      type: Array,
       //required: true, // 必须吗
       default: function() {
-        return ["20", "10", "10", "5", "16", "26", "-5"];
-      }
-    },
-    xAxis: {
-      type: Array,
-      default: function() {
-        return [
-          "文书档案",
-          "行政档案",
-          "人事档案",
-          "图文档案",
-          "刑事档案",
-          "刑事档案",
-          "经济档案"
-        ];
+        return {
+          tempData: ['9','12','8','15','10','-5','-18'], // 温度
+          humidityData: ['11','-12','14','15','16','15','20'], // 湿度
+          TvocData: ['11','12','14','15','16','17','18'], // Tvoc
+          lineTime: ['1','2','3','4','5'] // X轴
+        };
       }
     }
   },
@@ -80,14 +70,14 @@ export default {
     /**
      * 双折线图
      */
-    setOptions(expectedData = {}) {
-      let xData = this.xAxis;
+    setOptions(val) {
+      
       this.chart.setOption({
-        color:['#F6FF00','#00DEFF','#00FFAE'], 
+        color: ["#F6FF00", "#00DEFF", "#00FFAE"],
         legend: {
           data: ["温度", "湿度", "TVOC"],
-          textStyle:{
-              color:['#F6FF00','#00DEFF','#00FFAE']
+          textStyle: {
+            color: ["#F6FF00", "#00DEFF", "#00FFAE"]
           }
         },
         tooltip: {
@@ -108,7 +98,7 @@ export default {
         xAxis: [
           {
             type: "category",
-            data: xData,
+            data: val.lineTime,
             axisTick: {
               alignWithLabel: true
             }
@@ -120,33 +110,32 @@ export default {
             axisTick: {
               show: false
             },
-            boundaryGap: ["20%", "20%"],
-
-           
+            boundaryGap: ["20%", "20%"]
           }
         ],
         series: [
           {
             name: "温度",
             type: "line",
-            
+
             smooth: false,
-            data: [11, 11, 15, 13, 12, 13, 10]
+            data: val.tempData
           },
-          
+
           {
             name: "湿度",
             type: "line",
             smooth: false,
-            data: [1, -2, 2, 5, 3, 2, 0]
+            data: val.humidityData
           },
           {
-            data: expectedData,
+            
             name: "TVOC",
             type: "line",
             smooth: false,
             animationDuration: 2800,
-            animationEasing: "cubicInOut"
+            animationEasing: "cubicInOut",
+            data: val.TvocData,
           }
         ]
       });
