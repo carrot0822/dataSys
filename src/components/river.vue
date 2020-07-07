@@ -85,8 +85,8 @@
           </div>
           <div class="substance">
             <div id="info" class="info">
-             依据凭证性，是合同档案最突出也是重要的特点，意思是说依法订立的合同对当事人具有法律的约束力。合同的订立、生效、履行、变更以及权利义务的转让、终止、违约、责任等等，都必须完全地、唯一地依据合同档案，否则，就要承担由此产生的法律后果。由于具有这一作用，在市场经济体制下，合同档案是维护当事人合法权益的最直接、最有效的手段之一。这点特点需要引起广大经营者、管理部门以及档案工作者的重视。 合同要对当事人有法律的约束力，其自身必须具备法律规定的许可性，即对于合同本身是否具有法律效力，法律规定了特定的形式，不具备法律所要求的特定形式，该合同就不具有法律效力，视为无效合同。
-              <!--
+             
+              
               <swipe
                 v-if="noticeArr.length"
                 v-model="index"
@@ -98,7 +98,7 @@
                   <p class="notice-content">{{item.content}}</p>
                 </swipe-item>
               </swipe>
-              -->
+             
             </div>
           </div>
         </div>
@@ -429,7 +429,20 @@ export default {
           }
         });
     },
+    // 
+    _getNotice(obj={pageSize:'10',currentPage:'1'}){
+      let data = obj
+      axios.get(this.url + 'archivemodule/arcTbLargeHome/getAllHomeFileInfo',{
+        params:data
+      }).then((res)=>{
+        if(res.data.state){
+          this.noticeArr = res.data.rows
+        }else{
 
+        }
+        console.log(res)
+      })
+    },
     resizeWidth() {
       var ratio = $(window).width() / 1920;
       $("#file").css({
@@ -466,7 +479,7 @@ export default {
   },
   created() {
     this.url = window.testUrl;
-
+    this._getNotice()
     this.init();
     this._getmonitor();
 
