@@ -32,8 +32,12 @@ export default new Router({
             component:() =>import('./assets/common/cube/cube.vue')
         },
         {
-            path:'/test',
+            path:'/riverLine',
             component:()=>import('./components/riverLine.vue')
+        },
+        {
+            path:'/test',
+            component:()=>import('./components/test.vue')
         },
         {
             path:'/editor',

@@ -72,7 +72,7 @@
           </div>
           <div class="substance">
             <div class="lineChart">
-              <line-chart :chartData ="lineChart" :height="'380px'"></line-chart>
+              <line-chart :chartData="lineChart" :height="'380px'"></line-chart>
             </div>
           </div>
         </div>
@@ -82,6 +82,24 @@
         <div class="videoBox">
           <div class="top distance">
             <span class="title">档案管理制度</span>
+          </div>
+          <div class="substance">
+            <div id="info" class="info">
+             依据凭证性，是合同档案最突出也是重要的特点，意思是说依法订立的合同对当事人具有法律的约束力。合同的订立、生效、履行、变更以及权利义务的转让、终止、违约、责任等等，都必须完全地、唯一地依据合同档案，否则，就要承担由此产生的法律后果。由于具有这一作用，在市场经济体制下，合同档案是维护当事人合法权益的最直接、最有效的手段之一。这点特点需要引起广大经营者、管理部门以及档案工作者的重视。 合同要对当事人有法律的约束力，其自身必须具备法律规定的许可性，即对于合同本身是否具有法律效力，法律规定了特定的形式，不具备法律所要求的特定形式，该合同就不具有法律效力，视为无效合同。
+              <!--
+              <swipe
+                v-if="noticeArr.length"
+                v-model="index"
+                :autoplayTime="5000"
+                :pagination="false"
+              >
+                <swipe-item v-for="(item,index) of noticeArr" :key="index" class="paragraph">
+                  <p class="title">【{{item.title}}】</p>
+                  <p class="notice-content">{{item.content}}</p>
+                </swipe-item>
+              </swipe>
+              -->
+            </div>
           </div>
         </div>
         <div class="environmentBox">
@@ -110,12 +128,14 @@
                   <div class="cut">
                     <div :class="['center',item.state == 'on'?'arcColor':'arcError']"></div>
                   </div>
-                  <div :class="['inter',item.state == 'on'?'':'errorAdd']" ></div>
+                  <div :class="['inter',item.state == 'on'?'':'errorAdd']"></div>
                   <div class="iconBox">
                     <img :src="item.state == 'on'?airImg:airError" />
                   </div>
                 </div>
-                <div :class="['textBox',item.state == 'on'?'':'errorText']" >{{item.equName}}  {{item.state == 'on'?'':'(故障)'}}</div>
+                <div
+                  :class="['textBox',item.state == 'on'?'':'errorText']"
+                >{{item.equName}} {{item.state == 'on'?'':'(故障)'}}</div>
               </div>
             </div>
             <!-- 温湿度一体机 -->
@@ -127,12 +147,14 @@
                   <div class="cut">
                     <div :class="['center',item.state == 'on'?'arcColor':'arcError']"></div>
                   </div>
-                  <div :class="['inter',item.state == 'on'?'':'errorAdd']" ></div>
+                  <div :class="['inter',item.state == 'on'?'':'errorAdd']"></div>
                   <div class="iconBoxE">
                     <img :src="item.state == 'on'?equipImg:equipErr" />
                   </div>
                 </div>
-                <div :class="['textBox',item.state == 'on'?'':'errorText']" >{{item.equName}}  {{item.state == 'on'?'':'(故障)'}}</div>
+                <div
+                  :class="['textBox',item.state == 'on'?'':'errorText']"
+                >{{item.equName}} {{item.state == 'on'?'':'(故障)'}}</div>
               </div>
             </div>
           </div>
@@ -169,6 +191,7 @@
 import barChart from "./riverChart";
 import lineChart from "./riverLine";
 import axios from "axios";
+import { Swipe, SwipeItem } from "c-swipe";
 import $ from "jquery";
 export default {
   data() {
@@ -196,7 +219,8 @@ export default {
       },
       // 第二块
       // 文章链接
-
+      index: 0,
+      noticeArr: [],
       // 档案类型
       chartData: [1000, 1000, 3200, 4200, 5220, 6220, 7220],
       xAxis: ["周一", "周二", "周三", "周三", "周五", "周六", "周日"], // X轴
@@ -206,15 +230,17 @@ export default {
       airError: require("../assets/riverImg/airErr.png"),
       equipImg: require("../assets/riverImg/equipment.png"),
       equipErr: require("../assets/riverImg/equipErr.png"),
-      airArr:[],
-      equipArr:[],
+      airArr: [],
+      equipArr: [],
       // 报警日志
       logData: []
     };
   },
   components: {
     barChart,
-    lineChart
+    lineChart,
+    Swipe,
+    SwipeItem
   },
   methods: {
     // 定时器 后期替换成websocket
@@ -222,7 +248,7 @@ export default {
       this._getStore();
       this._getLog();
       this._getWeek();
-      this._getState()
+      this._getState();
     },
     fileFilter(arr) {
       let result = {};
@@ -315,10 +341,9 @@ export default {
           if (res.data.state) {
             this.equipNum = res.data.rows[0].equNum;
             // 开启定时器
-            setInterval(()=>{
+            setInterval(() => {
               this._getLine();
-            },3000)
-            
+            }, 3000);
           }
         });
     },
@@ -355,14 +380,14 @@ export default {
             } else {
               console.log(res.data.msg);
             }
-          }else{
-            console.log('么得数据')
+          } else {
+            console.log("么得数据");
           }
         });
     },
     // 档案管理制度
 
-     // 档案类型
+    // 档案类型
     _getWeek() {
       axios
         .get(this.url + "archivesmodule/arcTbFile/getSevenDayInfo")
@@ -377,17 +402,17 @@ export default {
         });
     },
     // 设备运行状态
-    _getState(){
+    _getState() {
       axios
         .get(this.url + "environment/equipment/selectEquipments")
         .then(res => {
           console.log(res, "设备运行状态");
           if (res.data.state) {
-            let data = res.data.rows
-            this.airArr = data.filter(item => item.fkTypeCode == 'znkt') 
-            this.equipArr = data.filter(item => item.fkTypeCode == 'wsdytj')
-            
-            console.log(this.airArr,this.equipArr,'过滤结果')
+            let data = res.data.rows;
+            this.airArr = data.filter(item => item.fkTypeCode == "znkt");
+            this.equipArr = data.filter(item => item.fkTypeCode == "wsdytj");
+
+            console.log(this.airArr, this.equipArr, "过滤结果");
           }
         });
     },
@@ -404,7 +429,6 @@ export default {
           }
         });
     },
-   
 
     resizeWidth() {
       var ratio = $(window).width() / 1920;
@@ -445,7 +469,7 @@ export default {
 
     this.init();
     this._getmonitor();
-    
+
     /*
     setInterval(() => {
       this.init();
@@ -475,12 +499,12 @@ export default {
 .arcError {
   border: 4px solid #ff0000;
 }
-.errorAdd{
-  background-color:#ff0000;
-  border: none!important;
+.errorAdd {
+  background-color: #ff0000;
+  border: none !important;
 }
-.errorText{
-  color: #ff0000!important;
+.errorText {
+  color: #ff0000 !important;
 }
 .mb_20 {
   margin-bottom: 20px;
@@ -609,6 +633,23 @@ export default {
 
         position: relative;
         margin-bottom: 20px;
+        .distance {
+          margin-bottom: 20px;
+        }
+        .substance {
+          .info {
+            width: 640px;
+            height: 380px;
+            overflow: hidden;
+            margin: 0 auto;
+            position: relative;
+            font-size: 18px;
+            font-family: Microsoft YaHei;
+            font-weight: 400;
+            color: rgba(138, 255, 254, 1);
+            line-height: 40px;
+          }
+        }
       }
       .environmentBox {
         background-image: url("../assets/riverImg/fileType.png");
