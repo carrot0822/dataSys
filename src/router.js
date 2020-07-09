@@ -10,6 +10,7 @@ export default new Router({
             path:'/',
             component:()=>import('./components/file.vue')
         },*/
+		/*
         {
             path:'/fileData',
             component:()=>import('./components/file.vue')
@@ -23,10 +24,7 @@ export default new Router({
             path:"/canvans",
             component:() =>import('./components/HelloWorld.vue')
         },
-        {
-            path:'/river',
-            component:()=>import('./components/river.vue')
-        },
+        
         {
             path:"/cube",
             component:() =>import('./assets/common/cube/cube.vue')
@@ -38,14 +36,22 @@ export default new Router({
         {
             path:'/test',
             component:()=>import('./components/test.vue')
-        },
+        },*/
+		{
+			path:'/',
+			component:()=>import('./components/river.vue')
+		},
+		{
+		    path:'/river',
+		    component:()=>import('./components/river.vue')
+		},
         {
             path:'/editor',
             component:()=>import('./components/editor/editor.vue')
         },
         {
             path:'*',
-            component:()=>import('./components/file.vue')
+            component:()=>import('./components/river.vue')
         },
         
         

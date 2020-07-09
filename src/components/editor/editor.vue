@@ -30,7 +30,9 @@
           <el-table-column prop="title" label="标题"></el-table-column>
           <el-table-column align="center" label="操作">
             <template slot-scope="scope">
+			<!--
               <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+			 -->
               <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
             </template>
           </el-table-column>
@@ -193,6 +195,7 @@ export default {
         .then(() => {
           let obj = {}
           obj.id = row.id
+          this._deleteNotice(obj)
           console.log(row.id,'删除选')
           console.log("走删除接口");
         })
@@ -205,11 +208,13 @@ export default {
     pageChangeBtn(val) {
       let obj = {};
       obj.currentPage = parseInt(val);
+      this._getNotice(obj)
       console.log(val);
     },
     // API
     _getNotice(obj={pageSize:'10',currentPage:'1'}){
       let data = obj
+      obj.pageSize = '10'
       axios.get(this.url + 'archivemodule/arcTbLargeHome/getAllHomeFileInfo',{
         params:data
       }).then((res)=>{
@@ -226,16 +231,27 @@ export default {
           data = Object.assign({},this.form)
       //data.arcTbLargeHomeInfo =Object.assign({},this.form)
       
-      axios.post(this.url + 'archivemodule/arcTbLargeHome/getAllHomeFileInfo',data).then((res)=>{
+      axios.post(this.url + 'archivemodule/arcTbLargeHome/uploadFileInfo',
+        data
+      ).then((res)=>{
         console.log(res)
+        if(res.data.state){
+          this.$message.success(res.data.msg)
+          this._getNotice()
+          this.change = false
+        }
         
       })
     },
     _deleteNotice(obj){
       let data = obj
       
-      axios.post(this.url + 'archivemodule/arcTbLargeHome/getAllHomeFileInfo',data).then((res)=>{
+      axios.post(this.url + 'archivemodule/arcTbLargeHome/delShowFile',data).then((res)=>{
         console.log(res)
+        if(res.data.state){
+          this.$message.success('删除成功')
+          this._getNotice()
+        }
       })
     }
   },

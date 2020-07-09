@@ -90,7 +90,7 @@
               <swipe
                 v-if="noticeArr.length"
                 v-model="index"
-                :autoplayTime="5000"
+                :autoplayTime="10000"
                 :pagination="false"
               >
                 <swipe-item v-for="(item,index) of noticeArr" :key="index" class="paragraph">
@@ -196,6 +196,7 @@ import $ from "jquery";
 export default {
   data() {
     return {
+		timer = null
       // 第一块
       // 温湿度 库房 区 温湿度数据
       form: {
@@ -313,7 +314,7 @@ export default {
           }
         });
     },
-    // 获取温湿度
+    // 获取温湿度 这里可能要报错
     _getHumiture() {
       let item = this.selectRegin;
       console.log(item, "被选中的区");
@@ -479,15 +480,17 @@ export default {
   },
   created() {
     this.url = window.testUrl;
-    this._getNotice()
+    
     this.init();
+    this._getNotice()
     this._getmonitor();
 
-    /*
-    setInterval(() => {
+    
+    this.timer = setInterval(() => {
       this.init();
       console.log("1s定时器测试");
-    }, 10000);*/
+    }, 10000);
+    
   },
   mounted() {
     let that = this;
@@ -502,6 +505,10 @@ export default {
     setTimeout(function() {
       that.resizeWidth();
     }, 10 * 1000);
+  },
+  destroyed(){
+	  let that = this
+	  clearInterval(that.timer)
   }
 };
 </script>

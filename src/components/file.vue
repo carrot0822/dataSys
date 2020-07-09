@@ -106,6 +106,7 @@
       <div class="secend">
         <div class="videoBox">
           <div class="videoSub">
+			  
             <video
               id="video"
               @playing="playNow"
@@ -267,7 +268,7 @@ export default {
       backNow: 0,
       // 第二块
       // 视频链接
-      videoSrc: require("../../public/test.mp4"),
+      videoSrc: '',
       poster: require("../../public/poster.png"),
       prevImg: "",
       // 温湿度 库房 区 温湿度数据 这里数据最多
