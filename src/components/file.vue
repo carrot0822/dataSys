@@ -569,14 +569,7 @@ export default {
   background-color: #ff8400;
 }
 #file {
-  overflow: hidden;
-  height: 100vh;
-
-  background-image: url("../assets/fileImg/bg.png");
-  background-size: cover;
-
-  background-repeat: no-repeat;
-  background-color: #00111f;
+ 
   .header {
     height: 91px;
     position: relative;

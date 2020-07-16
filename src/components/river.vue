@@ -8,6 +8,7 @@
       <div class="first">
         <div class="countBox">
           <!-- 库房 -->
+          
           <section class="formBox">
             <el-form class="control" ref="form" :inline="true" :model="form" label-width="50px">
               <el-form-item label>
@@ -25,6 +26,7 @@
                   ></el-option>
                 </el-select>
               </el-form-item>
+              <!--
               <el-form-item v-if="regionArr.length" label>
                 <el-select @change="changeRegin" v-model="form.region" placeholder="请选择区">
                   <el-option
@@ -35,11 +37,13 @@
                   ></el-option>
                 </el-select>
               </el-form-item>
+              -->
             </el-form>
           </section>
+          
           <!-- 环境温湿度 -->
           <div class="top distance">
-            <span class="title">环境曲线图</span>
+            <span class="title">温湿度环境值</span>
           </div>
 
           <div class="substance">
@@ -58,7 +62,7 @@
               </div>
               <div class="ringBox">
                 <div class="ring">
-                  <span class="Num">20.8</span>
+                  <span class="Num">{{Tvoc}}</span>
                 </div>
                 <p class="des">TVOC ug/m³</p>
               </div>
@@ -81,8 +85,13 @@
       <div class="secend">
         <div class="videoBox">
           <div class="top distance">
-            <span class="title">档案管理制度</span>
+            <span @click="beatry" class="title">档案管理制度</span>
           </div>
+          <!--
+          <div class="routerBtn">
+            <el-button type="primary" @click="jumpBtn" plain>进入编辑</el-button>
+          </div>
+          -->
           <div class="substance">
             <div id="info" class="info">
              
@@ -102,17 +111,19 @@
             </div>
           </div>
         </div>
+        <!--
         <div class="environmentBox">
           <div class="top distance">
             <span class="title">档案类型</span>
           </div>
           <div class="substance">
-            <!-- <div class="des">单位：&nbsp 卷</div> -->
+            
             <div class="barchart">
-              <bar-chart :height="'290px'" :chartData="chartData"></bar-chart>
+              <bar-chart :height="'290px'" :xAxis="xAxis" :chartData="chartData"></bar-chart>
             </div>
           </div>
         </div>
+        -->
       </div>
       <div class="thrid">
         <div class="borrowCount">
@@ -126,16 +137,16 @@
                 <div class="circleBox">
                   <div class="outer"></div>
                   <div class="cut">
-                    <div :class="['center',item.state == 'on'?'arcColor':'arcError']"></div>
+                    <div :class="['center',item.state == 'off'?'arcOff':item.state=='offline'?'arcError':'arcColor']"></div>
                   </div>
-                  <div :class="['inter',item.state == 'on'?'':'errorAdd']"></div>
+                  <div :class="['inter',item.state == 'off'?'errorOff':item.state=='offline'?'errorAdd':'']"></div>
                   <div class="iconBox">
-                    <img :src="item.state == 'on'?airImg:airError" />
+                    <img :src="item.state == 'offline'?airError:airImg" />
                   </div>
                 </div>
                 <div
-                  :class="['textBox',item.state == 'on'?'':'errorText']"
-                >{{item.equName}} {{item.state == 'on'?'':'(故障)'}}</div>
+                  :class="['textBox',item.state == 'off'?'offText':item.state=='offline'?'errorText':'']"
+                >{{item.equName}} </div>
               </div>
             </div>
             <!-- 温湿度一体机 -->
@@ -145,16 +156,16 @@
                 <div class="circleBox">
                   <div class="outer"></div>
                   <div class="cut">
-                    <div :class="['center',item.state == 'on'?'arcColor':'arcError']"></div>
+                    <div :class="['center',item.state == 'off'?'arcOff':item.state=='offline'?'arcError':'arcColor']"></div>
                   </div>
-                  <div :class="['inter',item.state == 'on'?'':'errorAdd']"></div>
+                  <div :class="['inter',item.state == 'off'?'errorOff':item.state=='offline'?'errorError':'']"></div>
                   <div class="iconBoxE">
-                    <img :src="item.state == 'on'?equipImg:equipErr" />
+                    <img :src="item.state == 'offline'?equipErr:equipImg" />
                   </div>
                 </div>
                 <div
-                  :class="['textBox',item.state == 'on'?'':'errorText']"
-                >{{item.equName}} {{item.state == 'on'?'':'(故障)'}}</div>
+                  :class="['textBox',item.state == 'on'?'':item.state=='off'?'offText':'errorText']"
+                >{{item.equName}}</div>
               </div>
             </div>
           </div>
@@ -196,7 +207,8 @@ import $ from "jquery";
 export default {
   data() {
     return {
-		timer = null
+    timer: null,
+    LineTimer:null,
       // 第一块
       // 温湿度 库房 区 温湿度数据
       form: {
@@ -209,6 +221,7 @@ export default {
       temperature: 0,
       humidity: 0,
       PM: 0,
+      Tvoc:0,
       // 环境曲线
       equipNum: "",
 
@@ -222,6 +235,7 @@ export default {
       // 文章链接
       index: 0,
       noticeArr: [],
+      click:0,
       // 档案类型
       chartData: [1000, 1000, 3200, 4200, 5220, 6220, 7220],
       xAxis: ["周一", "周二", "周三", "周三", "周五", "周六", "周日"], // X轴
@@ -246,19 +260,20 @@ export default {
   methods: {
     // 定时器 后期替换成websocket
     init() {
-      this._getStore();
+      
       this._getLog();
-      this._getWeek();
+      //this._getWeek();
       this._getState();
     },
     fileFilter(arr) {
       let result = {};
       let chart = [];
       let xAxis = [];
-      let temp = arr.reverse();
-      for (let item of temp) {
-        chart.push(item.lendCount);
-        xAxis.push(this.dateFilter(item.fileTime));
+      let temp = arr;
+      let limit = arr.length>7?7:arr.length
+      for (let i=0; i<limit;i++) {
+        chart.push(arr[i].count);
+        xAxis.push(arr[i].name);
       }
       result.chart = chart;
       result.xAxis = xAxis;
@@ -280,7 +295,7 @@ export default {
     changeRegin(val) {
       console.log(this.selectRegin, "被选中的区");
       console.log(val, "区域改变");
-      this._getHumiture();
+      //this._getHumiture();
     },
     _getStore() {
       axios
@@ -309,8 +324,29 @@ export default {
             this.regionArr = res.data.rows;
             this.form.region = res.data.rows[0].regionNum;
 
-            this._getHumiture();
+            //this._getHumiture();
+            this._getTvoc()
             console.log(this.regionArr, "区数据");
+          }
+        });
+    },
+    // 获取tvoc
+    _getTvoc(){
+      let fkStoreId = this.form.store;
+      axios
+        .get(
+          this.url +
+            `environmentmodule/wkTbEquAirDataHistory/selectEquDateHistory?fkStoreId=${fkStoreId}&fkEquNum=7&startTime=&endTime=&currentPage=1&pageSize=1` 
+        )
+        .then(res => {
+          console.log(res, "查询TVOC");
+
+          if (res.data.state) {
+            this.Tvoc = res.data.rows[0].tvoc?res.data.rows[0].tvoc:0;
+            this.temperature = res.data.rows[0].wd ? res.data.rows[0].wd : "0";
+          this.humidity = res.data.rows[0].sd ? res.data.rows[0].sd : "0";
+          }else{
+            console.log('tvoc查询失败')
           }
         });
     },
@@ -342,7 +378,7 @@ export default {
           if (res.data.state) {
             this.equipNum = res.data.rows[0].equNum;
             // 开启定时器
-            setInterval(() => {
+           this.LineTimer= setInterval(() => {
               this._getLine();
             }, 3000);
           }
@@ -363,9 +399,9 @@ export default {
             // 极有可能出现数据不存在的情况
             if (res.data.row) {
               if (len < 100) {
-                this.lineChart.tempData.push(res.data.row.wd);
-                this.lineChart.humidityData.push(res.data.row.sd);
-                this.lineChart.TvocData.push(res.data.row.tvoc);
+                this.lineChart.tempData.push(res.data.row.data.wd);
+                this.lineChart.humidityData.push(res.data.row.data.sd);
+                this.lineChart.TvocData.push(res.data.row.data.tvoc);
                 this.lineChart.lineTime.push(res.data.msg);
               } else {
                 this.lineChart.tempData.shift();
@@ -373,11 +409,12 @@ export default {
                 this.lineChart.TvocData.shift();
                 this.lineChart.lineTime.shift();
                 //
-                this.lineChart.tempData.push(res.data.row.wd);
-                this.lineChart.humidityData.push(res.data.row.sd);
-                this.lineChart.TvocData.push(res.data.row.tvoc);
+                this.lineChart.tempData.push(res.data.row.data.wd);
+                this.lineChart.humidityData.push(res.data.row.data.sd);
+                this.lineChart.TvocData.push(res.data.row.data.tvoc);
                 this.lineChart.lineTime.push(res.data.msg);
               }
+			  console.log(this.lineChart,'更改后的数据')
             } else {
               console.log(res.data.msg);
             }
@@ -391,13 +428,14 @@ export default {
     // 档案类型
     _getWeek() {
       axios
-        .get(this.url + "archivesmodule/arcTbFile/getSevenDayInfo")
+        .get(this.url + "countmodule/homePage/getArcOrder")
         .then(res => {
           console.log(res, "七天档案");
+          
           if (res.data.state) {
-            let obj = this.fileFilter(res.data.row.lendInfoList);
+            let obj = this.fileFilter(res.data.rows);
             this.chartData = obj.chart;
-            //this.xAxis = obj.xAxis;
+            this.xAxis = obj.xAxis;
             console.log(obj, "过滤数据");
           }
         });
@@ -410,6 +448,7 @@ export default {
           console.log(res, "设备运行状态");
           if (res.data.state) {
             let data = res.data.rows;
+            //res.data.rows[0].state = 'offline'
             this.airArr = data.filter(item => item.fkTypeCode == "znkt");
             this.equipArr = data.filter(item => item.fkTypeCode == "wsdytj");
 
@@ -430,7 +469,7 @@ export default {
           }
         });
     },
-    // 
+    // 公告内容
     _getNotice(obj={pageSize:'10',currentPage:'1'}){
       let data = obj
       axios.get(this.url + 'archivemodule/arcTbLargeHome/getAllHomeFileInfo',{
@@ -443,6 +482,19 @@ export default {
         }
         console.log(res)
       })
+    },
+    // 路由跳转
+    jumpBtn(){
+      this.$router.push({ path: 'editor' })
+    },
+    beatry(){
+      if(this.click == 5 ){
+        
+        this.$router.push({ path: 'editor' })
+        this.click = 0
+      }else{
+        this.click++
+      }
     },
     resizeWidth() {
       var ratio = $(window).width() / 1920;
@@ -459,6 +511,7 @@ export default {
         $("body").width()
       );
     }
+    
   },
   computed: {
     selectStore() {
@@ -480,14 +533,16 @@ export default {
   },
   created() {
     this.url = window.testUrl;
-    
-    this.init();
-    this._getNotice()
-    this._getmonitor();
-
-    
+    this._getStore(); // 温湿度环境值
+    this._getNotice() // 档案管理制度
+    this._getState(); // 设备运行状态
+    this._getmonitor(); // 温湿度曲线
+    //this._getWeek(); // 档案类型
+    this._getLog(); // 报警记录
     this.timer = setInterval(() => {
       this.init();
+      this._getTvoc()
+      //this._getHumiture()
       console.log("1s定时器测试");
     }, 10000);
     
@@ -508,7 +563,8 @@ export default {
   },
   destroyed(){
 	  let that = this
-	  clearInterval(that.timer)
+    clearInterval(that.timer)
+    clearInterval(that.LineTimer)
   }
 };
 </script>
@@ -516,8 +572,15 @@ export default {
 .arcColor {
   border: 4px solid #00fffc;
 }
+.arcOff{
+  border: 4px solid gray;
+}
 .arcError {
   border: 4px solid #ff0000;
+}
+.errorOff{
+  background-color: gray;
+  border: none !important;
 }
 .errorAdd {
   background-color: #ff0000;
@@ -526,12 +589,15 @@ export default {
 .errorText {
   color: #ff0000 !important;
 }
+.offText{
+  color:gray!important
+}
 .mb_20 {
   margin-bottom: 20px;
 }
 #file {
   overflow: hidden;
-  height: 100vh;
+  height: 100%;
 
   background-image: url("../assets/riverImg/bg.png");
   background-size: cover;
@@ -643,12 +709,12 @@ export default {
     .secend {
       margin-right: 20px;
       .videoBox {
-        background-image: url("../assets/riverImg/text.png");
+        background-image: url("../assets/riverImg/textZ.png");
         background-size: cover;
         background-position: 50% 50%;
         background-repeat: no-repeat;
         width: 691px;
-        height: 471px;
+        height: 896px;
         box-sizing: border-box;
 
         position: relative;
@@ -659,7 +725,7 @@ export default {
         .substance {
           .info {
             width: 640px;
-            height: 380px;
+            height: 880px;
             overflow: hidden;
             margin: 0 auto;
             position: relative;

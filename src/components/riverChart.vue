@@ -110,7 +110,7 @@ export default {
         series: [
           {
             data: expectedData,
-            name: "借阅数",
+            name: "总数",
             itemStyle: {
               //barBorderRadius: [50, 50, 0, 0],
               color: function(params) {

@@ -13,6 +13,7 @@
           -->
           <div class="operateBox">
             <el-button type="primary" @click="addBtn" plain>添加</el-button>
+            <el-button type="primary" @click="backBtn" plain>返回首页</el-button>
           </div>
         </div>
       </div>
@@ -56,8 +57,8 @@
           </el-form-item>
           <el-form-item prop="content" label="内容" :label-width="formLabelWidth">
             <el-input
-              :rows="18"
-              maxlength="300"
+              :rows="20"
+              maxlength="600"
               show-word-limit
               resize="none"
               type="textarea"
@@ -82,56 +83,7 @@ export default {
     return {
       search: "",
       tableData: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1517 弄"
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄"
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1516 弄"
-        },
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄"
-        },
-        {
-          date: "2016-05-04",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1517 弄"
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄"
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1516 弄"
-        },
-        {
-          date: "2016-05-01",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1519 弄"
-        },
-        {
-          date: "2016-05-03",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1516 弄"
-        }
+        
       ],
       // 分页数据
       total: 0,
@@ -175,6 +127,9 @@ export default {
       this.form.title = "";
       this.form.content = "";
       this.change = true;
+    },
+    backBtn(){
+      this.$router.push({ path: '/' })
     },
     handleEdit(index, row) {
       // 查询单条数据

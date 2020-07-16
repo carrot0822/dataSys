@@ -42,6 +42,10 @@ export default new Router({
 			component:()=>import('./components/river.vue')
 		},
 		{
+		    path:'/data',
+		    component:()=>import('./components/Data.vue')
+		},
+		{
 		    path:'/river',
 		    component:()=>import('./components/river.vue')
 		},

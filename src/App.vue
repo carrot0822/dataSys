@@ -20,7 +20,14 @@ export default {
   
 }
 body{
+  overflow: hidden;
+  height: 100vh;
   
+  background-image: url("./assets/fileImg/bg.png");
+  background-size: cover;
+  
+  background-repeat: no-repeat;
+  background-color: #00111f;
   
   
     
